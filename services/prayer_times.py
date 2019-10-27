@@ -1,14 +1,12 @@
 import sqlite3
 from sqlite3 import Error
 import re
-from datetime import datetime
-
-#TODO handle saving time
+import time
 
 class Prayer_times:
 
     def __init__(self, db_file):
-        self.regex = 'prayer times(?:(?: month| m)? (\d{2})(?: day (\d{2})| d (\d{2})| (\d{2}))?)?'
+        self.regex = 'prayer times(?: month| m)? (\d{2})(?: day (\d{2})| d (\d{2})| (\d{2}))?'
         self.error_msg = None
         self.conn = self.create_connection(db_file)
         try:
@@ -34,16 +32,18 @@ class Prayer_times:
             cur.execute("SELECT day, fajr, sunrise, dhuhr, asr, maghrib, isha \
                 FROM prayer_times WHERE month=?", (month_str,))
         else:
-            month_str = format(datetime.now().month, '02')
-            day_str = format(datetime.now().day, '02')
-            cur.execute("SELECT day, fajr, sunrise, dhuhr, asr, maghrib, isha \
-                FROM prayer_times WHERE month=? AND day=?", (month_str, day_str))
+            return []
 
         rows = cur.fetchall()
 
         return rows
 
+    def apply_DST_end(self, rows):
+        print("TODO")
+        return rows
+
     def parse_message(self, message):
+        localtime = time.localtime()
         p = re.compile(self.regex, re.IGNORECASE)
         m = p.match(message)
         month = None
@@ -53,20 +53,30 @@ class Prayer_times:
             for i in range(2, 5):
                 if m.group(i):
                     day = m.group(i)
-        return month, day
+        else:
+            month = format(localtime.tm_mon, '02')
+            day = format(localtime.tm_mday, '02')
+
+        is_dst = time.localtime().tm_isdst
+
+        return month, day, is_dst
 
     def build_response_message(self, message_text):
         if self.error_msg:
             return self.error_msg
 
-        month, day = self.parse_message(message_text)
+        month, day, is_dst = self.parse_message(message_text)
 
-        rows = self.select_time_by_date(month, day_str=day)
+        rows = self.select_time_by_date(month_str=month, day_str=day)
+
+        print(month, is_dst)
+        if month == "10" and not is_dst:
+            rows = self.apply_DST_end(rows)
 
         response_message = ""
         for r in rows:
             for e in r:
-                response_message += e
+                response_message += e + " - "
             response_message += "\n"
 
         return response_message
@@ -74,10 +84,8 @@ class Prayer_times:
 
 if __name__ == '__main__':
     pt = Prayer_times("../db/information_bot.db")
-    message = "prayer times 10 27"
     message = "prayer times month 10 d 27"
+    message = "prayer times 11 29"
     message = "prayer times"
-    month, day = pt.parse_message(message)
-    res = pt.select_time_by_date(month_str=month, day_str=day)
-    for r in res:
-        print(r)
+    res = pt.build_response_message(message)
+    print(res)
