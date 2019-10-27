@@ -26,15 +26,12 @@ def handle_message(event_data):
         channel = message["channel"]
         if "hi" in message_text.lower().split(" "):
             response_message = "Hello <@%s>! :tada:" % message["user"]
-            response = slack_client.chat_postMessage(channel=channel, text=response_message)
         elif "prayer times" in message_text.lower():
-            response_message = ""
-            res = Prayer_times(env("DB_FILE")).select_time_by_date("10") #TODO remove (test)
-            for r in res:
-                for e in r:
-                    response_message += e + "  "
-                response_message += "\n"
-            response = slack_client.chat_postMessage(channel=channel, text=response_message)
+            response_message = Prayer_times(env("DB_FILE")).build_response_message(message_text)
+        else:
+            response_message = 'No service found for your text! Type "Help" \
+                to get a list of the available services'
+        response = slack_client.chat_postMessage(channel=channel, text=response_message)
 
 # Error events
 @slack_events_adapter.on("error")
