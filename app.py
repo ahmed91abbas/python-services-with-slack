@@ -25,4 +25,4 @@ def handle_message(event_data):
 def error_handler(err):
     print("ERROR: " + str(err))
 
-slack_events_adapter.start(port=3000)
+slack_events_adapter.start(port=env("PORT"))
