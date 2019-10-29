@@ -3,9 +3,12 @@ from sqlite3 import Error
 import re
 import time
 
+#TODO fix problem with prayer times 10
+
 class Prayer_times:
 
     def __init__(self, db_file):
+        self.column_names = ["day", "fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"]
         self.regex = 'prayer times(?: month| m)? (\d{2})(?: day (\d{2})| d (\d{2})| (\d{2}))?'
         self.error_msg = None
         self.conn = self.create_connection(db_file)
@@ -24,12 +27,16 @@ class Prayer_times:
         return conn
 
     def select_time_by_date(self, month_str=None, day_str=None):
+        columns = ""
+        for i in range(len(self.column_names)-1):
+            columns += self.column_names[i] + ","
+        columns += self.column_names[len(self.column_names)-1]
         cur = self.conn.cursor()
         if month_str and day_str:
-            cur.execute("SELECT day, fajr, sunrise, dhuhr, asr, maghrib, isha \
+            cur.execute("SELECT " + columns + " \
                 FROM prayer_times WHERE month=? AND day=?", (month_str, day_str,))
         elif month_str:
-            cur.execute("SELECT day, fajr, sunrise, dhuhr, asr, maghrib, isha \
+            cur.execute("SELECT " + columns + " \
                 FROM prayer_times WHERE month=?", (month_str,))
         else:
             return []
@@ -81,6 +88,8 @@ class Prayer_times:
             rows = self.apply_DST_end(rows)
 
         response_message = self.inti_message()
+        response_message["blocks"].append(\
+            self.create_message_section(self.column_names, same_style=True))
         for row in rows:
             response_message["blocks"].append(\
                 self.create_message_section(row))
@@ -92,7 +101,7 @@ class Prayer_times:
         message["blocks"] = []
         return message
 
-    def create_message_section(self, elements):
+    def create_message_section(self, elements, same_style=False):
         section = {}
         section["type"] = "section"
         section["text"] = {}
@@ -100,18 +109,16 @@ class Prayer_times:
         text = ""
         switch = True
         for i in range(len(elements)-1):
-            if switch:
+            if same_style or switch:
                 text += elements[i] + " - "
                 switch = False
             else:
                 text += "*" + elements[i] + "* - "
                 switch = True
-        if switch:
-            text += elements[i]
+        if same_style or switch:
+            text += elements[len(elements)-1]
         else:
-            text += "*" + elements[i] + "*"
-
-        print(text)
+            text += "*" + elements[len(elements)-1] + "*"
 
         section["text"]["text"] = text
         return section
@@ -123,4 +130,5 @@ if __name__ == '__main__':
     message = "prayer times 11 29"
     message = "prayer times"
     res = pt.build_response_message(message)
-    print(res)
+    for section in res["blocks"]:
+        print(section["text"]["text"])
