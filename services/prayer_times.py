@@ -42,6 +42,7 @@ class Prayer_times:
         res_rows = []
         for row in rows:
             res_row = []
+            res_row.append(row[0])
             for i in range(1, len(row)):
                 e = row[i]
                 res_row.append(e[0] + \
@@ -79,13 +80,41 @@ class Prayer_times:
         if month == "10" and not is_dst:
             rows = self.apply_DST_end(rows)
 
-        response_message = ""
-        for r in rows:
-            for e in r:
-                response_message += e + " - "
-            response_message += "\n"
+        response_message = self.inti_message()
+        for row in rows:
+            response_message["blocks"].append(\
+                self.create_message_section(row))
 
         return response_message
+
+    def inti_message(self):
+        message = {}
+        message["blocks"] = []
+        return message
+
+    def create_message_section(self, elements):
+        section = {}
+        section["type"] = "section"
+        section["text"] = {}
+        section["text"]["type"] = "mrkdwn"
+        text = ""
+        switch = True
+        for i in range(len(elements)-1):
+            if switch:
+                text += elements[i] + " - "
+                switch = False
+            else:
+                text += "*" + elements[i] + "* - "
+                switch = True
+        if switch:
+            text += elements[i]
+        else:
+            text += "*" + elements[i] + "*"
+
+        print(text)
+
+        section["text"]["text"] = text
+        return section
 
 
 if __name__ == '__main__':

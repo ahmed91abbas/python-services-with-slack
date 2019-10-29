@@ -31,7 +31,7 @@ def handle_message(event_data):
         else:
             response_message = 'No service found for your text! Type "Help" \
                 to get a list of the available services'
-        response = slack_client.chat_postMessage(channel=channel, text=response_message)
+        response = slack_client.chat_postMessage(channel=channel, **response_message)
 
 # Error events
 @slack_events_adapter.on("error")
