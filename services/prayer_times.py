@@ -39,8 +39,15 @@ class Prayer_times:
         return rows
 
     def apply_DST_end(self, rows):
-        print("TODO")
-        return rows
+        res_rows = []
+        for row in rows:
+            res_row = []
+            for i in range(1, len(row)):
+                e = row[i]
+                res_row.append(e[0] + \
+                    str(int(e[1])-1) + e[2:])
+            res_rows.append(res_row)
+        return res_rows
 
     def parse_message(self, message):
         localtime = time.localtime()
@@ -69,7 +76,6 @@ class Prayer_times:
 
         rows = self.select_time_by_date(month_str=month, day_str=day)
 
-        print(month, is_dst)
         if month == "10" and not is_dst:
             rows = self.apply_DST_end(rows)
 
