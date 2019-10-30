@@ -12,17 +12,13 @@ class Prayer_times:
         self.regex = 'prayer times(?: month| m)? (\d{2})(?: day (\d{2})| d (\d{2})| (\d{2}))?'
         self.error_msg = None
         self.conn = self.create_connection(db_file)
-        try:
-            self.conn = sqlite3.connect(db_file)
-        except Error as e:
-            self.error_msg = str(e)
 
     def create_connection(self, db_file):
         conn = None
         try:
             conn = sqlite3.connect(db_file)
         except Error as e:
-            print(e)
+            self.error_msg = str(e)
 
         return conn
 
