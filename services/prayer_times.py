@@ -87,7 +87,7 @@ class Prayer_times:
 
         rows = self.select_times_by_date(month_str=month, day_str=day)
 
-        response_message = self.inti_message()
+        response_message = self.init_message()
 
         if not rows:
             response_message["blocks"].append(self.create_title_section(\
@@ -112,7 +112,7 @@ class Prayer_times:
 
         return response_message
 
-    def inti_message(self):
+    def init_message(self):
         message = {}
         message["blocks"] = []
         return message
