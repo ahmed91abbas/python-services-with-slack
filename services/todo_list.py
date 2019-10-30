@@ -21,7 +21,7 @@ class Todo_list:
 
         action_list["add"] = {}
         action_list["add"]["regex"] = 'add (.*) to todo(?:_list)?'
-        action_list["add"]["fucntion"] = self.create_task
+        action_list["add"]["function"] = self.create_task
         action_list["add"]["success_message"] = \
             "Created a new task with ID: "
         action_list["add"]["failed_message"] = \
@@ -29,6 +29,7 @@ class Todo_list:
 
         action_list["enumerate"] = {}
         action_list["enumerate"]["regex"] = '(:?enumerate |list |show |all )?todo'
+        action_list["enumerate"]["function"] = self.select_all
         action_list["enumerate"]["success_message"] = \
             "All tasks in Todo list:"
         action_list["enumerate"]["failed_message"] = \
@@ -83,13 +84,13 @@ class Todo_list:
             p = re.compile(self.action_list[action]["regex"], re.IGNORECASE)
             m = p.match(message)
             if m:
-                try:
-                    text = m.group(1)
+                text = m.group(1)
+                if text:
                     return self.action_list[action],\
-                        self.action_list[action]["fucntion"](text)
-                except:
+                        self.action_list[action]["function"](text)
+                else:
                     return self.action_list[action],\
-                        self.action_list[action]["fucntion"]
+                        self.action_list[action]["function"]()
 
     def build_response_message(self, message_text):
 
@@ -107,8 +108,14 @@ class Todo_list:
 
         response_message["blocks"].append(self.create_title_section(\
             action["success_message"]))
-        response_message["blocks"].append(self.create_title_section(\
-            f"{results}"))
+
+        if type(results) is list:
+            for res in results:
+                response_message["blocks"].append(\
+                    self.create_title_section(res))
+        else:
+            response_message["blocks"].append(self.create_title_section(\
+                results))
 
         return response_message
 
@@ -127,7 +134,8 @@ class Todo_list:
 
 if __name__ == '__main__':
     todo_list = Todo_list("../db/information_bot.db")
-    message = "add new new to todo"
+    message = "add test to todo"
+    message = "todo"
     res = todo_list.build_response_message(message)
     for section in res["blocks"]:
         print(section["text"]["text"])
