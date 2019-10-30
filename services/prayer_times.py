@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3 import Error
 import re
 import time
-
+from datetime import datetime
 #TODO fix problem with prayer times 10
 
 class Prayer_times:
@@ -26,7 +26,7 @@ class Prayer_times:
 
         return conn
 
-    def select_time_by_date(self, month_str=None, day_str=None):
+    def select_times_by_date(self, month_str=None, day_str=None):
         columns = ""
         for i in range(len(self.column_names)-1):
             columns += self.column_names[i] + ","
@@ -45,15 +45,23 @@ class Prayer_times:
 
         return rows
 
-    def apply_DST_end(self, rows):
+    def apply_DST_end(self, month, rows):
         res_rows = []
+        year = datetime.now().year
         for row in rows:
             res_row = []
-            res_row.append(row[0])
+            day = row[0]
+            ts = datetime.timestamp(datetime(year, int(month), int(day)))
+            is_dst = time.localtime(ts).tm_isdst
+            res_row.append(day)
             for i in range(1, len(row)):
                 e = row[i]
-                res_row.append(e[0] + \
-                    str(int(e[1])-1) + e[2:])
+                if is_dst:
+                    res_row.append(e)
+                else:
+                    res_row.append(\
+                        format(int(e[:2])-1, '02')\
+                        + e[2:])
             res_rows.append(res_row)
         return res_rows
 
@@ -82,10 +90,10 @@ class Prayer_times:
 
         month, day, is_dst = self.parse_message(message_text)
 
-        rows = self.select_time_by_date(month_str=month, day_str=day)
+        rows = self.select_times_by_date(month_str=month, day_str=day)
 
-        if month == "10" and not is_dst:
-            rows = self.apply_DST_end(rows)
+        if month == "10":
+            rows = self.apply_DST_end(month, rows)
 
         response_message = self.inti_message()
         response_message["blocks"].append(\
@@ -128,7 +136,7 @@ if __name__ == '__main__':
     pt = Prayer_times("../db/information_bot.db")
     message = "prayer times month 10 d 27"
     message = "prayer times 11 29"
-    message = "prayer times"
+    message = "prayer times 10"
     res = pt.build_response_message(message)
     for section in res["blocks"]:
         print(section["text"]["text"])
