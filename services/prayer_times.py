@@ -3,7 +3,7 @@ from sqlite3 import Error
 import re
 import time
 from datetime import datetime
-#TODO fix problem with prayer times 10
+from datetime import date
 
 class Prayer_times:
 
@@ -91,15 +91,23 @@ class Prayer_times:
 
         rows = self.select_times_by_date(month_str=month, day_str=day)
 
+        response_message = self.inti_message()
+
+        if not rows:
+            response_message["blocks"].append(self.create_title_section(\
+                f"No results found for M {month}, D {day}"))
+            return response_message
+
         now = datetime.now()
         year = datetime.now().year
-        month_str = now.strftime("%B")
+        month_str = date(year, int(month), 1).strftime('%B')
 
         if month == "10":
             rows = self.apply_DST_end(month, year, rows)
 
-        response_message = self.inti_message()
-        response_message["blocks"].append(self.create_title_section(f"Showing results for {month_str}"))
+
+        response_message["blocks"].append(self.create_title_section(\
+            f"Showing results for {month_str}"))
         response_message["blocks"].append(\
             self.create_message_section(self.column_names, same_style=True))
         for row in rows:
