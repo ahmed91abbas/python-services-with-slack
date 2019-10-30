@@ -21,10 +21,18 @@ class Todo_list:
 
         action_list["add"] = {}
         action_list["add"]["regex"] = 'add (.*) to todo(?:_list)?'
+        action_list["add"]["fucntion"] = self.create_task
         action_list["add"]["success_message"] = \
             "Created a new task with ID: "
         action_list["add"]["failed_message"] = \
             "Failed to create a new task"
+
+        action_list["enumerate"] = {}
+        action_list["enumerate"]["regex"] = '(:?enumerate |list |show |all )?todo'
+        action_list["enumerate"]["success_message"] = \
+            "All tasks in Todo list:"
+        action_list["enumerate"]["failed_message"] = \
+            "Nothing to show."
 
         return action_list
 
@@ -75,8 +83,13 @@ class Todo_list:
             p = re.compile(self.action_list[action]["regex"], re.IGNORECASE)
             m = p.match(message)
             if m:
-                text = m.group(1)
-                return self.action_list[action], self.create_task(text)
+                try:
+                    text = m.group(1)
+                    return self.action_list[action],\
+                        self.action_list[action]["fucntion"](text)
+                except:
+                    return self.action_list[action],\
+                        self.action_list[action]["fucntion"]
 
     def build_response_message(self, message_text):
 
@@ -114,7 +127,7 @@ class Todo_list:
 
 if __name__ == '__main__':
     todo_list = Todo_list("../db/information_bot.db")
-    message = "add xdsad dasdsa to todo"
+    message = "add new new to todo"
     res = todo_list.build_response_message(message)
     for section in res["blocks"]:
         print(section["text"]["text"])
