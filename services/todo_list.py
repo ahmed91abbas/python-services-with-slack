@@ -37,7 +37,7 @@ class Todo_list:
             cur.execute(sql, (text, datetime.now()))
         return cur.lastrowid
 
-    def remove_task(self, task_id):
+    def delete_task(self, task_id):
         try:
             cur = self.conn.cursor()
             sql = f'''DELETE FROM {TABLE_NAME} WHERE {ID_COL} = ?'''
@@ -48,10 +48,18 @@ class Todo_list:
             self.error_msg = str(e)
             print(str(e))
 
+    def delete_all_tasks(self):
+        sql = f'DELETE FROM {TABLE_NAME}'
+        cur = self.conn.cursor()
+        cur.execute(sql)
+        self.conn.commit()
+        cur.close()
+
 if __name__ == '__main__':
     todo_list = Todo_list("../db/information_bot.db")
+    todo_list.delete_all_tasks()
     res = todo_list.create_task("test2")
-    todo_list.remove_task(1)
+    # todo_list.delete_task(1)
     rows = todo_list.select_all()
     for row in rows:
         print(row)
