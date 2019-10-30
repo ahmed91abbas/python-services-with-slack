@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 from datetime import datetime
+import re
 
 TABLE_NAME = "todo_list"
 ID_COL = "generated_id"
@@ -10,8 +11,22 @@ CREATED_COL = "created_datetime"
 class Todo_list:
 
     def __init__(self, db_file):
+        self.action_list = self.init_action_list()
+        self.add_regex = 'add (.*) to todo(?:_list)?'
         self.error_msg = None
         self.conn = self.create_connection(db_file)
+
+    def init_action_list(self):
+        action_list = {}
+
+        action_list["add"] = {}
+        action_list["add"]["regex"] = 'add (.*) to todo(?:_list)?'
+        action_list["add"]["success_message"] = \
+            "Created a new task with ID: "
+        action_list["add"]["failed_message"] = \
+            "Failed to create a new task"
+
+        return action_list
 
     def create_connection(self, db_file):
         conn = None
@@ -55,11 +70,51 @@ class Todo_list:
         self.conn.commit()
         cur.close()
 
+    def excute_message_action(self, message):
+        for action in self.action_list:
+            p = re.compile(self.action_list[action]["regex"], re.IGNORECASE)
+            m = p.match(message)
+            if m:
+                text = m.group(1)
+                return self.action_list[action], self.create_task(text)
+
+    def build_response_message(self, message_text):
+
+        action, results = self.excute_message_action(message_text)
+
+        if self.error_msg:
+            return self.error_msg
+
+        response_message = self.init_message()
+
+        if not results:
+            response_message["blocks"].append(self.create_title_section(\
+                action["failed_message"]))
+            return response_message
+
+        response_message["blocks"].append(self.create_title_section(\
+            action["success_message"]))
+        response_message["blocks"].append(self.create_title_section(\
+            f"{results}"))
+
+        return response_message
+
+    def init_message(self):
+        message = {}
+        message["blocks"] = []
+        return message
+
+    def create_title_section(self, text):
+        section = {}
+        section["type"] = "section"
+        section["text"] = {}
+        section["text"]["type"] = "plain_text"
+        section["text"]["text"] = text
+        return section
+
 if __name__ == '__main__':
     todo_list = Todo_list("../db/information_bot.db")
-    todo_list.delete_all_tasks()
-    res = todo_list.create_task("test2")
-    # todo_list.delete_task(1)
-    rows = todo_list.select_all()
-    for row in rows:
-        print(row)
+    message = "add xdsad dasdsa to todo"
+    res = todo_list.build_response_message(message)
+    for section in res["blocks"]:
+        print(section["text"]["text"])
