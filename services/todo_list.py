@@ -3,6 +3,7 @@ from sqlite3 import Error
 from datetime import datetime
 
 TABLE_NAME = "todo_list"
+ID_COL = "generated_id"
 TEXT_COL = "text"
 CREATED_COL = "created_datetime"
 
@@ -36,10 +37,21 @@ class Todo_list:
             cur.execute(sql, (text, datetime.now()))
         return cur.lastrowid
 
+    def remove_task(self, task_id):
+        try:
+            cur = self.conn.cursor()
+            sql = f'''DELETE FROM {TABLE_NAME} WHERE {ID_COL} = ?'''
+            cur.execute(sql, (task_id, ))
+            self.conn.commit()
+            cur.close()
+        except Error as e:
+            self.error_msg = str(e)
+            print(str(e))
+
 if __name__ == '__main__':
     todo_list = Todo_list("../db/information_bot.db")
     res = todo_list.create_task("test2")
-    print(res)
+    todo_list.remove_task(1)
     rows = todo_list.select_all()
     for row in rows:
         print(row)
