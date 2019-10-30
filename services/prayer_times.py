@@ -45,9 +45,8 @@ class Prayer_times:
 
         return rows
 
-    def apply_DST_end(self, month, rows):
+    def apply_DST_end(self, month, year, rows):
         res_rows = []
-        year = datetime.now().year
         for row in rows:
             res_row = []
             day = row[0]
@@ -92,10 +91,15 @@ class Prayer_times:
 
         rows = self.select_times_by_date(month_str=month, day_str=day)
 
+        now = datetime.now()
+        year = datetime.now().year
+        month_str = now.strftime("%B")
+
         if month == "10":
-            rows = self.apply_DST_end(month, rows)
+            rows = self.apply_DST_end(month, year, rows)
 
         response_message = self.inti_message()
+        response_message["blocks"].append(self.create_title_section(f"Showing results for {month_str}"))
         response_message["blocks"].append(\
             self.create_message_section(self.column_names, same_style=True))
         for row in rows:
@@ -108,6 +112,14 @@ class Prayer_times:
         message = {}
         message["blocks"] = []
         return message
+
+    def create_title_section(self, text):
+        section = {}
+        section["type"] = "section"
+        section["text"] = {}
+        section["text"]["type"] = "plain_text"
+        section["text"]["text"] = text
+        return section
 
     def create_message_section(self, elements, same_style=False):
         section = {}
@@ -136,7 +148,7 @@ if __name__ == '__main__':
     pt = Prayer_times("../db/information_bot.db")
     message = "prayer times month 10 d 27"
     message = "prayer times 11 29"
-    message = "prayer times 10"
+    message = "prayer times"
     res = pt.build_response_message(message)
     for section in res["blocks"]:
         print(section["text"]["text"])
