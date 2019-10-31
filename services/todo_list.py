@@ -138,7 +138,7 @@ class Todo_list:
                 action["success_message"]))
             for res in results:
                 response_message["blocks"].append(\
-                    self.create_title_section(res))
+                    self.create_message_section(res))
         else:
             response_message["blocks"].append(self.create_title_section(\
                 action["success_message"] % results))
@@ -155,6 +155,23 @@ class Todo_list:
         section["type"] = "section"
         section["text"] = {}
         section["text"]["type"] = "plain_text"
+        section["text"]["text"] = text
+        return section
+
+    def create_message_section(self, elements):
+        section = {}
+        section["type"] = "section"
+        section["text"] = {}
+        section["text"]["type"] = "mrkdwn"
+
+        task_id = elements[0]
+        text = elements[1]
+        ts = elements[2]
+
+        ts = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S.%f')
+        ts = ts.strftime("%Y-%m-%d %H:%M")
+
+        text = f"{task_id} *-* {text} *-* {ts}"
         section["text"]["text"] = text
         return section
 
