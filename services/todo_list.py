@@ -12,28 +12,35 @@ class Todo_list:
 
     def __init__(self, db_file):
         self.action_list = self.init_action_list()
-        self.add_regex = 'add (.*) to todo(?:_list)?'
         self.error_msg = None
         self.conn = self.create_connection(db_file)
 
     def init_action_list(self):
         action_list = {}
 
-        action_list["add"] = {}
-        action_list["add"]["regex"] = 'add (.*) to todo(?:_list)?'
-        action_list["add"]["function"] = self.create_task
-        action_list["add"]["success_message"] = \
-            "Created a new task with ID: "
-        action_list["add"]["failed_message"] = \
+        action_list["add_task"] = {}
+        action_list["add_task"]["regex"] = 'add (.*) to todo'
+        action_list["add_task"]["function"] = self.create_task
+        action_list["add_task"]["success_message"] = \
+            "Created a new task with ID %s"
+        action_list["add_task"]["failed_message"] = \
             "Failed to create a new task"
 
-        action_list["enumerate"] = {}
-        action_list["enumerate"]["regex"] = '(:?enumerate |list |show |all )?todo'
-        action_list["enumerate"]["function"] = self.select_all
-        action_list["enumerate"]["success_message"] = \
+        action_list["enumerate_all"] = {}
+        action_list["enumerate_all"]["regex"] = '(:?enumerate |list |show |all )?todo'
+        action_list["enumerate_all"]["function"] = self.list_all_tasks
+        action_list["enumerate_all"]["success_message"] = \
             "All tasks in Todo list:"
-        action_list["enumerate"]["failed_message"] = \
+        action_list["enumerate_all"]["failed_message"] = \
             "Nothing to show."
+
+        action_list["delete_task"] = {}
+        action_list["delete_task"]["regex"] = 'delete (\\d+) from todo'
+        action_list["delete_task"]["function"] = self.delete_task
+        action_list["delete_task"]["success_message"] = \
+            "The task with ID %s has been removed successfully"
+        action_list["delete_task"]["failed_message"] = \
+            "Failed to remove the task"
 
         return action_list
 
@@ -45,7 +52,7 @@ class Todo_list:
             self.error_msg = str(e)
         return conn
 
-    def select_all(self):
+    def list_all_tasks(self):
         with self.conn:
             cur = self.conn.cursor()
             cur.execute("SELECT * FROM todo_list")
@@ -68,9 +75,13 @@ class Todo_list:
             cur.execute(sql, (task_id, ))
             self.conn.commit()
             cur.close()
+            if cur.rowcount:
+                return task_id
         except Error as e:
             self.error_msg = str(e)
             print(str(e))
+            return None
+        return None
 
     def delete_all_tasks(self):
         sql = f'DELETE FROM {TABLE_NAME}'
@@ -78,6 +89,7 @@ class Todo_list:
         cur.execute(sql)
         self.conn.commit()
         cur.close()
+        return cur.rowcount
 
     def excute_message_action(self, message):
         for action in self.action_list:
@@ -91,6 +103,9 @@ class Todo_list:
                 else:
                     return self.action_list[action],\
                         self.action_list[action]["function"]()
+        failed = {}
+        failed["failed_message"] = "Command not found!"
+        return failed, None
 
     def build_response_message(self, message_text):
 
@@ -106,16 +121,15 @@ class Todo_list:
                 action["failed_message"]))
             return response_message
 
-        response_message["blocks"].append(self.create_title_section(\
-            action["success_message"]))
-
         if type(results) is list:
+            response_message["blocks"].append(self.create_title_section(\
+                action["success_message"]))
             for res in results:
                 response_message["blocks"].append(\
                     self.create_title_section(res))
         else:
             response_message["blocks"].append(self.create_title_section(\
-                results))
+                action["success_message"] % results))
 
         return response_message
 
@@ -134,8 +148,9 @@ class Todo_list:
 
 if __name__ == '__main__':
     todo_list = Todo_list("../db/information_bot.db")
-    message = "add test to todo"
     message = "todo"
+    message = "add test to todo"
+    message = "delete 13 from todo"
     res = todo_list.build_response_message(message)
     for section in res["blocks"]:
         print(section["text"]["text"])
