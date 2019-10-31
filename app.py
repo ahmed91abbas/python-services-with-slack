@@ -5,6 +5,7 @@ import json
 from environs import Env
 from collections import deque
 from services.prayer_times import Prayer_times
+from services.todo_list import Todo_list
 
 env = Env()
 env.read_env()
@@ -28,6 +29,8 @@ def handle_message(event_data):
             response_message = "Hello <@%s>! :tada:" % message["user"]
         elif "prayer times" in message_text.lower():
             response_message = Prayer_times(env("DB_FILE")).build_response_message(message_text)
+        elif "todo" in message_text.lower():
+            response_message = Todo_list(env("DB_FILE")).build_response_message(message_text)
         else:
             response_message = 'No service found for your text! Type "Help" \
                 to get a list of the available services'
