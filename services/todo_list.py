@@ -27,12 +27,12 @@ class Todo_list:
             "Failed to create a new task"
 
         action_list["enumerate_all"] = {}
-        action_list["enumerate_all"]["regex"] = '(:?enumerate |list |show |all )?todo'
+        action_list["enumerate_all"]["regex"] = '(?:enumerate |list |show |all )?todo'
         action_list["enumerate_all"]["function"] = self.list_all_tasks
         action_list["enumerate_all"]["success_message"] = \
             "All tasks in Todo list:"
         action_list["enumerate_all"]["failed_message"] = \
-            "Nothing to show."
+            "Nothing to show. Todo list is empty."
 
         action_list["delete_task"] = {}
         action_list["delete_task"]["regex"] = 'delete (\\d+) from todo'
@@ -41,6 +41,14 @@ class Todo_list:
             "The task with ID %s has been removed successfully"
         action_list["delete_task"]["failed_message"] = \
             "Failed to remove the task"
+
+        action_list["delete_all"] = {}
+        action_list["delete_all"]["regex"] = 'delete (?:all|everything) from todo'
+        action_list["delete_all"]["function"] = self.delete_all_tasks
+        action_list["delete_all"]["success_message"] = \
+            "Deleted %s tasks. Todo list is empty now."
+        action_list["delete_all"]["failed_message"] = \
+            "Nothing to remove.Todo list is empty."
 
         return action_list
 
@@ -96,7 +104,11 @@ class Todo_list:
             p = re.compile(self.action_list[action]["regex"], re.IGNORECASE)
             m = p.match(message)
             if m:
-                text = m.group(1)
+                try:
+                    text = m.group(1)
+                except:
+                    text = None
+
                 if text:
                     return self.action_list[action],\
                         self.action_list[action]["function"](text)
@@ -148,9 +160,10 @@ class Todo_list:
 
 if __name__ == '__main__':
     todo_list = Todo_list("../db/information_bot.db")
-    message = "todo"
+    message = "delete everything from todo"
     message = "add test to todo"
-    message = "delete 13 from todo"
+    message = "delete 2 from todo"
+    message = "enumerate todo"
     res = todo_list.build_response_message(message)
     for section in res["blocks"]:
         print(section["text"]["text"])
