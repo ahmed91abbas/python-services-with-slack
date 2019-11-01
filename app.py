@@ -9,7 +9,6 @@ class App:
 
     def __init__(self):
         rtm_read_delay = 0.3
-        self.mention_regex = "^<@(|[WU].+?)>(.*)"
 
         self.env = Env()
         self.env.read_env()
@@ -33,15 +32,19 @@ class App:
                 return event
         return None
 
+    def get_match(self, regex, text):
+        p = re.compile(regex, re.IGNORECASE)
+        return p.match(text)
+
     def handle_message(self, event):
         message = event["text"]
         channel = event["channel"]
         user = event["user"]
-        if "hi" in message.lower().split(" "):
+        if self.get_match("(?:hi|hello|ping)", message):
             response_message = "Hello <@%s>! :tada:" % user
-        elif "prayer times" in message.lower():
+        elif self.get_match("prayer times", message):
             response_message = Prayer_times(self.env("DB_FILE")).build_response_message(message)
-        elif "todo" in message.lower():
+        elif self.get_match("todo", message):
             response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
         else:
             response_message = 'No service found for your text! Type "Help" to get a list of the available services'
