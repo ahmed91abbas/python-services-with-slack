@@ -1,53 +1,67 @@
-from slackeventsapi import SlackEventAdapter
-import slack
-import os
-import json
+import time
+import re
+from slackclient import SlackClient
 from environs import Env
-from collections import deque
 from services.prayer_times import Prayer_times
 from services.todo_list import Todo_list
 
-env = Env()
-env.read_env()
+class App:
 
-slack_events_adapter = SlackEventAdapter(
-    env("SLACK_SIGNING_SECRET"), "/slack/events")
-slack_client = slack.WebClient(env("BOT_ACCESS_TOKEN"))
+    def __init__(self):
+        rtm_read_delay = 0.3
+        self.mention_regex = "^<@(|[WU].+?)>(.*)"
 
-# Used to prevent responding to events several times
-ts_queue = deque([], maxlen=100)
+        self.env = Env()
+        self.env.read_env()
+        self.slack_client = SlackClient(self.env("SERVICES_BOT_ACCESS_TOKEN"))
+        self.starterbot_id = None
 
-# Message events
-@slack_events_adapter.on("message")
-def handle_message(event_data):
-    message = event_data["event"]
-    if is_valid_message(message):
-        ts_queue.appendleft(message["ts"])
-        message_text = message["text"]
-        channel = message["channel"]
-        if "hi" in message_text.lower().split(" "):
-            response_message = "Hello <@%s>! :tada:" % message["user"]
-        elif "prayer times" in message_text.lower():
-            response_message = Prayer_times(env("DB_FILE")).build_response_message(message_text)
-        elif "todo" in message_text.lower():
-            response_message = Todo_list(env("DB_FILE")).build_response_message(message_text)
+        if self.slack_client.rtm_connect(with_team_state=False):
+            print("Starter Bot connected and running!")
+            self.starterbot_id = self.slack_client.api_call("auth.test")["user_id"]
+            while True:
+                event = self.parse_events(self.slack_client.rtm_read())
+                if event:
+                    self.handle_message(event)
+                time.sleep(rtm_read_delay)
         else:
-            response_message = 'No service found for your text! Type "Help" \
-                to get a list of the available services'
+            print("Connection failed.")
+
+    def parse_events(self, slack_events):
+        for event in slack_events:
+            if event["type"] == "message" and not "subtype" in event:
+                return event
+        return None
+
+    def handle_message(self, event):
+        message = event["text"]
+        channel = event["channel"]
+        user = event["user"]
+        if "hi" in message.lower().split(" "):
+            response_message = "Hello <@%s>! :tada:" % user
+        elif "prayer times" in message.lower():
+            response_message = Prayer_times(self.env("DB_FILE")).build_response_message(message)
+        elif "todo" in message.lower():
+            response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
+        else:
+            response_message = 'No service found for your text! Type "Help" to get a list of the available services'
+
         if type(response_message) is dict:
-            response = slack_client.chat_postMessage(channel=channel, **response_message)
+            r = self.slack_client.api_call(
+                "chat.postMessage",
+                channel=channel,
+                **response_message
+            )
         else:
-            response = slack_client.chat_postMessage(channel=channel, text=response_message)
+            r = self.slack_client.api_call(
+                "chat.postMessage",
+                channel=channel,
+                text=response_message
+            )
+        if r["ok"]:
+            print("Posted message successfully. ts=" + r["ts"])
+        else:
+            print("Failed to post message! ts=" + r["ts"])
 
-# Error events
-@slack_events_adapter.on("error")
-def error_handler(err):
-    print("ERROR: " + str(err))
-
-def is_valid_message(message):
-    #CPW9ATAF9 = General channel
-    return (message.get("subtype") is None) \
-        and (message["channel"] != "CPW9ATAF9") \
-        and (not message["ts"] in ts_queue)
-
-slack_events_adapter.start(port=env("PORT"))
+if __name__ == "__main__":
+    App()
