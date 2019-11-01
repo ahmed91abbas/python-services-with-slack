@@ -20,10 +20,15 @@ class App:
             while True:
                 event = self.parse_events(self.slack_client.rtm_read())
                 if event:
-                    self.handle_message(event)
+                    self.handle_message_and_send_response(event)
+
                 time.sleep(rtm_read_delay)
         else:
             print("Connection failed.")
+
+    def handle_message_and_send_response(self, event):
+        message, channel = self.handle_message(event)
+        self.send_response(message, channel)
 
     def parse_events(self, slack_events):
         for event in slack_events:
@@ -41,25 +46,28 @@ class App:
         user = event["user"]
         if self.get_match("(?:hi|hello|ping)", message):
             response_message = "Hello <@%s>! :tada:" % user
-        elif self.get_match("prayer times", message):
+        elif self.get_match("prayer times(.*)", message):
             response_message = Prayer_times(self.env("DB_FILE")).build_response_message(message)
-        elif self.get_match("todo", message):
+        elif self.get_match("(.*)todo", message):
             response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
         else:
             response_message = 'No service found for your text! Type "Help" to get a list of the available services'
+        return response_message, channel
 
-        if type(response_message) is dict:
+    def send_response(self, message, channel):
+        if type(message) is dict:
             r = self.slack_client.api_call(
                 "chat.postMessage",
                 channel=channel,
-                **response_message
+                **message
             )
         else:
             r = self.slack_client.api_call(
                 "chat.postMessage",
                 channel=channel,
-                text=response_message
+                text=message
             )
+
         if r["ok"]:
             print("Posted message successfully. ts=" + r["ts"])
         else:
