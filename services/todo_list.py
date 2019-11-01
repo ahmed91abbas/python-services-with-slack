@@ -35,7 +35,7 @@ class Todo_list:
             "Nothing to show. Todo list is empty."
 
         action_list["delete_task"] = {}
-        action_list["delete_task"]["regex"] = 'delete (\\d+) from todo'
+        action_list["delete_task"]["regex"] = '(?:delete|remove) (\\d+) from todo'
         action_list["delete_task"]["function"] = self.delete_task
         action_list["delete_task"]["success_message"] = \
             "The task with ID %s has been removed successfully"
@@ -43,7 +43,7 @@ class Todo_list:
             "Failed to remove the task"
 
         action_list["delete_all"] = {}
-        action_list["delete_all"]["regex"] = 'delete (?:all|everything) from todo'
+        action_list["delete_all"]["regex"] = '(?:delete|remove) (?:all|everything) from todo'
         action_list["delete_all"]["function"] = self.delete_all_tasks
         action_list["delete_all"]["success_message"] = \
             "Deleted %s tasks. Todo list is empty now."
