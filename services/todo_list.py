@@ -171,7 +171,7 @@ class Todo_list:
         ts = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S.%f')
         ts = ts.strftime("%Y-%m-%d %H:%M")
 
-        text = f"{task_id} *-* {text} *-* {ts}"
+        text = f"{task_id} - *{text}* {ts}"
         section["text"]["text"] = text
         return section
 
