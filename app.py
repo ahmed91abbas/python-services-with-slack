@@ -8,13 +8,12 @@ from services.todo_list import Todo_list
 class App:
 
     def __init__(self):
-        rtm_read_delay = 0.3
-
         self.env = Env()
         self.env.read_env()
-        self.slack_client = SlackClient(self.env("SERVICES_BOT_ACCESS_TOKEN"))
         self.starterbot_id = None
 
+    def start(self, rtm_read_delay=0.3):
+        self.slack_client = SlackClient(self.env("SERVICES_BOT_ACCESS_TOKEN"))
         if self.slack_client.rtm_connect(with_team_state=False):
             print("Starter Bot connected and running!")
             self.starterbot_id = self.slack_client.api_call("auth.test")["user_id"]
@@ -67,4 +66,4 @@ class App:
             print("Failed to post message! ts=" + r["ts"])
 
 if __name__ == "__main__":
-    App()
+    App().start()
