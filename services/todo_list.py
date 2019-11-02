@@ -176,7 +176,7 @@ class Todo_list:
         return section
 
 if __name__ == '__main__':
-    todo_list = Todo_list("../db/services.db")
+    todo_list = Todo_list("../db/services_db.db")
     message = "delete everything from todo"
     message = "add test to todo"
     message = "delete 2 from todo"
