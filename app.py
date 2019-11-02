@@ -4,6 +4,8 @@ from slackclient import SlackClient
 from environs import Env
 from services.prayer_times import Prayer_times
 from services.todo_list import Todo_list
+from services.reminder import Reminder
+import threading
 
 class App:
 
@@ -20,7 +22,9 @@ class App:
             while True:
                 event = self.parse_events(self.slack_client.rtm_read())
                 if event:
-                    self.handle_message_and_send_response(event)
+                    handler_thread = threading.Thread(\
+                        target=self.handle_message_and_send_response, args=(event,))
+                    handler_thread.start()
 
                 time.sleep(rtm_read_delay)
         else:
@@ -50,6 +54,9 @@ class App:
             response_message = Prayer_times(self.env("DB_FILE")).build_response_message(message)
         elif self.get_match("(.*)todo", message):
             response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
+        elif self.get_match("(?:reminder|remind me) to (.*)", message):
+            self.send_response("Ok.", channel)
+            response_message, channel = Reminder().build_response_message(message, channel, user)
         else:
             response_message = 'No service found for your text! Type "Help" to get a list of the available services'
         return response_message, channel
