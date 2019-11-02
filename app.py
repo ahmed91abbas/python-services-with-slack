@@ -54,9 +54,9 @@ class App:
             response_message = Prayer_times(self.env("DB_FILE")).build_response_message(message)
         elif self.get_match("(.*)todo", message):
             response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
-        elif self.get_match("(?:reminder|remind me) to (.*)", message):
+        elif self.get_match("(?:reminder|remind me)(.*)", message):
             self.send_response("Ok.", channel)
-            response_message, channel = Reminder().build_response_message(message, channel, user)
+            response_message, channel = Reminder().build_response_message(message, from_channel=channel, to_channel="#reminders")
         else:
             response_message = 'No service found for your text! Type "Help" to get a list of the available services'
         return response_message, channel
