@@ -13,6 +13,8 @@ class App:
         self.env = Env()
         self.env.read_env()
         self.starterbot_id = None
+        #Empty reminder list on start
+        Reminder(self.env("DB_FILE")).delete_all_reminders()
 
     def start(self, rtm_read_delay=0.3):
         self.slack_client = SlackClient(self.env("SERVICES_BOT_ACCESS_TOKEN"))
@@ -24,6 +26,7 @@ class App:
                 if event:
                     handler_thread = threading.Thread(\
                         target=self.handle_message_and_send_response, args=(event,))
+                    handler_thread.daemon = True
                     handler_thread.start()
 
                 time.sleep(rtm_read_delay)
@@ -55,8 +58,8 @@ class App:
         elif self.get_match("(.*)todo", message):
             response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
         elif self.get_match("(?:reminder|remind me)(.*)", message):
-            self.send_response("Ok.", channel)
-            response_message, channel = Reminder().build_response_message(message, from_channel=channel, to_channel="#reminders")
+            self.send_response("Ok", channel)
+            response_message, channel = Reminder(self.env("DB_FILE")).build_response_message(message, from_channel=channel, to_channel="#reminders")
         else:
             response_message = 'No service found for your text! Type "Help" to get a list of the available services'
         return response_message, channel
