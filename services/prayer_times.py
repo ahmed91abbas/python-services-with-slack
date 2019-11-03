@@ -1,43 +1,30 @@
-import sqlite3
-from sqlite3 import Error
+import os
+import sys
+sys.path.append(os.path.abspath('..'))
+
 import re
 import time
 from datetime import datetime
 from datetime import date
+from services.db_manager import Db_manager
 
 class Prayer_times:
 
     def __init__(self, db_file):
         self.column_names = ["day", "fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"]
-        self.regex = 'prayer times(?: month| m)? (\d{2})(?: day (\d{2})| d (\d{2})| (\d{2}))?'
+        self.regex = 'prayer times(?: month| m)? (\\d{2})(?: day (\\d{2})| d (\\d{2})| (\\d{2}))?'
         self.error_msg = None
-        self.conn = self.create_connection(db_file)
-
-    def create_connection(self, db_file):
-        conn = None
-        try:
-            conn = sqlite3.connect(db_file)
-        except Error as e:
-            self.error_msg = str(e)
-
-        return conn
+        self.db = Db_manager(db_file, "prayer_times")
 
     def select_times_by_date(self, month_str=None, day_str=None):
-        columns = ""
-        for i in range(len(self.column_names)-1):
-            columns += self.column_names[i] + ","
-        columns += self.column_names[len(self.column_names)-1]
-        cur = self.conn.cursor()
         if month_str and day_str:
-            cur.execute("SELECT " + columns + " \
-                FROM prayer_times WHERE month=? AND day=?", (month_str, day_str,))
+            cols = ["month", "day"]
+            values = [month_str, day_str]
+            rows = self.db.select_where_condition(cols, values, select_cols=self.column_names)
         elif month_str:
-            cur.execute("SELECT " + columns + " \
-                FROM prayer_times WHERE month=?", (month_str,))
+            rows = self.db.select_where_condition("month", month_str, select_cols=self.column_names)
         else:
             return []
-
-        rows = cur.fetchall()
 
         return rows
 
@@ -149,10 +136,10 @@ class Prayer_times:
 
 
 if __name__ == '__main__':
-    pt = Prayer_times("../db/information_bot.db")
-    message = "prayer times month 10 d 27"
-    message = "prayer times 11 29"
+    pt = Prayer_times("../db/services_db.db")
     message = "prayer times"
+    message = "prayer times 11"
+    message = "prayer times month 10 d 27"
     res = pt.build_response_message(message)
     for section in res["blocks"]:
         print(section["text"]["text"])
