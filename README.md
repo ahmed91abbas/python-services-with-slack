@@ -25,8 +25,9 @@ A Slack bot with several services. Once the application is running you can invit
         python db/create_db.py
     This will create a new database file called *services_db.db*
 2. Rename *.env.example* to *.env* and edit the values inside it:
-            - **SERVICES_BOT_ACCESS_TOKEN** value should be the **Bot User OAuth Access Token** you noted when you created the Slack app.
-            - **DB_FILE** value is the absolute path to *services_db.db* which have been created in the previous step.
+
+    * **SERVICES_BOT_ACCESS_TOKEN** value should be the **Bot User OAuth Access Token** you noted when you created the Slack app.
+    * **DB_FILE** value is the absolute path to *services_db.db* which have been created in the previous step.
 
 ## Run the application
 Now all what is left is to run the application:
