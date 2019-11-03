@@ -1,8 +1,11 @@
+import os
+import sys
+sys.path.append(os.path.abspath('..'))
+
 import time
 import re
-import sqlite3
-from sqlite3 import Error
 import datetime
+from services.db_manager import Db_manager
 
 TABLE_NAME = "reminders"
 ID_COL = "generated_id"
@@ -17,55 +20,23 @@ class Reminder:
         self.min_names = ["m", "min", "minute", "minutes"]
         self.hour_names = ["h", "hour", "hours"]
 
-        self.conn = self.create_connection(db_file)
-
-    def create_connection(self, db_file):
-        conn = None
-        try:
-            conn = sqlite3.connect(db_file)
-        except Error as e:
-            print(str(e))
-        return conn
+        self.db = Db_manager(db_file, TABLE_NAME)
 
     def create_task(self, text, delta):
-        with self.conn:
-            cur = self.conn.cursor()
-            sql = f'''INSERT INTO {TABLE_NAME}
-                    ({TEXT_COL}, {CREATED_COL}, {SCHEDULED_COL})
-                    VALUES (?,?,?)'''
-            created_datetime = datetime.datetime.now()
-            scheduled_datetime = created_datetime + datetime.timedelta(0,delta)
-            cur.execute(sql, (text, created_datetime, scheduled_datetime))
-        return cur.lastrowid
+        created_datetime = datetime.datetime.now()
+        scheduled_datetime = created_datetime + datetime.timedelta(0,delta)
+        cols = [TEXT_COL, CREATED_COL, SCHEDULED_COL]
+        values = [text, created_datetime, scheduled_datetime]
+        return self.db.insert_values(cols, values)
 
     def delete_task(self, task_id):
-        try:
-            cur = self.conn.cursor()
-            sql = f'''DELETE FROM {TABLE_NAME} WHERE {ID_COL} = ?'''
-            cur.execute(sql, (task_id, ))
-            self.conn.commit()
-            cur.close()
-            if cur.rowcount:
-                return task_id
-        except Error as e:
-            print(str(e))
-            return None
-        return None
+        return self.db.delete_where_condition(ID_COL, task_id)
 
     def delete_all_reminders(self):
-        sql = f'DELETE FROM {TABLE_NAME}'
-        cur = self.conn.cursor()
-        cur.execute(sql)
-        self.conn.commit()
-        cur.close()
-        return cur.rowcount
+        return self.db.delete_all()
 
     def list_all_reminders(self):
-        with self.conn:
-            cur = self.conn.cursor()
-            cur.execute(f"SELECT * FROM {TABLE_NAME}")
-            rows = cur.fetchall()
-        return rows
+        return self.db.select_all()
 
     def build_cond_re(self, elements):
         res = ""
@@ -148,5 +119,5 @@ class Reminder:
         return section
 
 if __name__ == '__main__':
-    message = "reminder to x and y after 7 sec"
+    message = "reminder to x and y after 1 sec"
     Reminder("../db/services_db.db").build_response_message(message)
