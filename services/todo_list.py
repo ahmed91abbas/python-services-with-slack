@@ -1,7 +1,10 @@
-import sqlite3
-from sqlite3 import Error
+import os
+import sys
+sys.path.append(os.path.abspath('..'))
+
 from datetime import datetime
 import re
+from services.db_manager import Db_manager
 
 TABLE_NAME = "todo_list"
 ID_COL = "generated_id"
@@ -13,7 +16,7 @@ class Todo_list:
     def __init__(self, db_file):
         self.action_list = self.init_action_list()
         self.error_msg = None
-        self.conn = self.create_connection(db_file)
+        self.db = Db_manager(db_file, TABLE_NAME)
 
     def init_action_list(self):
         action_list = {}
@@ -52,52 +55,19 @@ class Todo_list:
 
         return action_list
 
-    def create_connection(self, db_file):
-        conn = None
-        try:
-            conn = sqlite3.connect(db_file)
-        except Error as e:
-            self.error_msg = str(e)
-        return conn
-
     def list_all_tasks(self):
-        with self.conn:
-            cur = self.conn.cursor()
-            cur.execute("SELECT * FROM todo_list")
-            rows = cur.fetchall()
-        return rows
+        return self.db.select_all()
 
     def create_task(self, text):
-        with self.conn:
-            cur = self.conn.cursor()
-            sql = f'''INSERT INTO {TABLE_NAME}
-                    ({TEXT_COL}, {CREATED_COL})
-                    VALUES (?,?)'''
-            cur.execute(sql, (text, datetime.now()))
-        return cur.lastrowid
+        cols = [TEXT_COL, CREATED_COL]
+        values = [text, datetime.now()]
+        return self.db.insert_values(cols, values)
 
     def delete_task(self, task_id):
-        try:
-            cur = self.conn.cursor()
-            sql = f'''DELETE FROM {TABLE_NAME} WHERE {ID_COL} = ?'''
-            cur.execute(sql, (task_id, ))
-            self.conn.commit()
-            cur.close()
-            if cur.rowcount:
-                return task_id
-        except Error as e:
-            self.error_msg = str(e)
-            print(str(e))
-            return None
-        return None
+        return self.db.delete_where_condition(ID_COL, task_id)
 
     def delete_all_tasks(self):
-        sql = f'DELETE FROM {TABLE_NAME}'
-        cur = self.conn.cursor()
-        cur.execute(sql)
-        self.conn.commit()
-        cur.close()
-        return cur.rowcount
+        return self.db.delete_all()
 
     def excute_message_action(self, message):
         for action in self.action_list:
@@ -179,7 +149,7 @@ if __name__ == '__main__':
     todo_list = Todo_list("../db/services_db.db")
     message = "delete everything from todo"
     message = "add test to todo"
-    message = "delete 2 from todo"
+    message = "delete 8 from todo"
     message = "enumerate todo"
     res = todo_list.build_response_message(message)
     for section in res["blocks"]:
