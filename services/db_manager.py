@@ -14,24 +14,31 @@ class Db_manager:
             conn = sqlite3.connect(db_file)
         except Error as e:
             self.error_msg = str(e)
-            print(self.error_msg)
         return conn
 
     def select_all(self):
-        with self.conn:
-            cur = self.conn.cursor()
-            cur.execute(f"SELECT * FROM {self.table_name}")
-            rows = cur.fetchall()
-        return rows
+        try:
+            with self.conn:
+                cur = self.conn.cursor()
+                cur.execute(f"SELECT * FROM {self.table_name}")
+                rows = cur.fetchall()
+            return rows
+        except Error as e:
+            self.error_msg = str(e)
+        return None
 
     def insert_values(self, cols, values):
-        with self.conn:
-            cur = self.conn.cursor()
-            sql = f'''INSERT INTO {self.table_name}
-                    ({",".join(cols)})
-                    VALUES ({",".join(["?" for x in cols])})'''
-            cur.execute(sql, (values))
-        return cur.lastrowid
+        try:
+            with self.conn:
+                cur = self.conn.cursor()
+                sql = f'''INSERT INTO {self.table_name}
+                        ({",".join(cols)})
+                        VALUES ({",".join(["?" for x in cols])})'''
+                cur.execute(sql, (values))
+            return cur.lastrowid
+        except Error as e:
+            self.error_msg = str(e)
+        return None
 
     def delete_where_condition(self, cols, values):
         where_stmt = self.create_where_statment(cols)
@@ -47,16 +54,19 @@ class Db_manager:
                 return values
         except Error as e:
             self.error_msg = str(e)
-            print(str(e))
         return None
 
     def delete_all(self):
-        sql = f'DELETE FROM {self.table_name}'
-        cur = self.conn.cursor()
-        cur.execute(sql)
-        self.conn.commit()
-        cur.close()
-        return cur.rowcount
+        try:
+            sql = f'DELETE FROM {self.table_name}'
+            cur = self.conn.cursor()
+            cur.execute(sql)
+            self.conn.commit()
+            cur.close()
+            return cur.rowcount
+        except Error as e:
+            self.error_msg = str(e)
+        return None
 
     def create_where_statment(self, cols):
         stmt = "WHERE "
