@@ -27,6 +27,20 @@ class Db_manager:
             self.error_msg = str(e)
         return None
 
+    def select_where_condition(self, cols, values, select_cols="*"):
+        where_stmt = self.create_where_statment(cols)
+        try:
+            with self.conn:
+                if type(select_cols) is list:
+                    select_cols = ", ".join(select_cols)
+                cur = self.conn.cursor()
+                sql = f'''SELECT {select_cols} FROM {self.table_name} {where_stmt}'''
+                cur.execute(sql, (self.to_list(values)))
+                return cur.fetchall()
+        except Error as e:
+            self.error_msg = str(e)
+        return None
+
     def insert_values(self, cols, values):
         try:
             with self.conn:
@@ -34,7 +48,7 @@ class Db_manager:
                 sql = f'''INSERT INTO {self.table_name}
                         ({",".join(cols)})
                         VALUES ({",".join(["?" for x in cols])})'''
-                cur.execute(sql, (values))
+                cur.execute(sql, (self.to_list(values)))
             return cur.lastrowid
         except Error as e:
             self.error_msg = str(e)
@@ -45,9 +59,7 @@ class Db_manager:
         try:
             cur = self.conn.cursor()
             sql = f'''DELETE FROM {self.table_name} {where_stmt}'''
-            if not type(values) is list:
-                list_values = [values]
-            cur.execute(sql, (list_values))
+            cur.execute(sql, (self.to_list(values)))
             self.conn.commit()
             cur.close()
             if cur.rowcount:
@@ -75,4 +87,12 @@ class Db_manager:
         else:
             stmt += cols + " = ?"
         return stmt
+
+    def to_list(self, values):
+        if not type(values) is list:
+            list_values = [values]
+        else:
+            list_values = values
+        return list_values
+
 
