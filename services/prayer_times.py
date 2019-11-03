@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from datetime import date
 from services.db_manager import Db_manager
+from services.slack_message_builder import Slack_message_builder
 
 class Prayer_times:
 
@@ -74,12 +75,11 @@ class Prayer_times:
 
         rows = self.select_times_by_date(month_str=month, day_str=day)
 
-        response_message = self.init_message()
+        smb = Slack_message_builder()
 
         if not rows:
-            response_message["blocks"].append(self.create_title_section(\
-                f"No results found for M {month}, D {day}"))
-            return response_message
+            smb.add_plain_section(f"No results found for M {month}, D {day}")
+            return smb.message
 
         now = datetime.now()
         year = datetime.now().year
@@ -88,51 +88,29 @@ class Prayer_times:
         if month == "10":
             rows = self.apply_DST_end(month, year, rows)
 
-
-        response_message["blocks"].append(self.create_title_section(\
-            f"Showing results for {month_str}"))
-        response_message["blocks"].append(\
-            self.create_message_section(self.column_names, same_style=True))
+        smb.add_plain_section(f"Showing results for {month_str}")
+        smb.add_formated_section(self.formate_cols(self.column_names, same_style=True))
         for row in rows:
-            response_message["blocks"].append(\
-                self.create_message_section(row))
+            smb.add_formated_section(self.formate_cols(row))
 
-        return response_message
+        return smb.message
 
-    def init_message(self):
-        message = {}
-        message["blocks"] = []
-        return message
-
-    def create_title_section(self, text):
-        section = {}
-        section["type"] = "section"
-        section["text"] = {}
-        section["text"]["type"] = "plain_text"
-        section["text"]["text"] = text
-        return section
-
-    def create_message_section(self, elements, same_style=False):
-        section = {}
-        section["type"] = "section"
-        section["text"] = {}
-        section["text"]["type"] = "mrkdwn"
+    def formate_cols(self, cols, same_style=False):
         text = ""
         switch = True
-        for i in range(len(elements)-1):
+        for i in range(len(cols)-1):
             if same_style or switch:
-                text += elements[i] + " - "
+                text += cols[i] + " - "
                 switch = False
             else:
-                text += "*" + elements[i] + "* - "
+                text += "*" + cols[i] + "* - "
                 switch = True
         if same_style or switch:
-            text += elements[len(elements)-1]
+            text += cols[len(cols)-1]
         else:
-            text += "*" + elements[len(elements)-1] + "*"
+            text += "*" + cols[len(cols)-1] + "*"
 
-        section["text"]["text"] = text
-        return section
+        return text
 
 
 if __name__ == '__main__':
