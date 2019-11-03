@@ -120,4 +120,10 @@ class Reminder:
 
 if __name__ == '__main__':
     message = "reminder to x and y after 1 sec"
-    Reminder("../db/services_db.db").build_response_message(message)
+    reminder = Reminder("../db/services_db.db")
+    res = reminder.build_response_message(message)[0]
+    if type(res) is dict:
+        for section in res["blocks"]:
+            print(section["text"]["text"])
+    else:
+        print(res)
