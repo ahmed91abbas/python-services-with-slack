@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath('..'))
 from datetime import datetime
 import re
 from services.utils.db_manager import Db_manager
+from services.utils.slack_message_builder import Slack_message_builder
 
 TABLE_NAME = "todo_list"
 ID_COL = "generated_id"
@@ -96,54 +97,31 @@ class Todo_list:
         if self.error_msg:
             return self.error_msg
 
-        response_message = self.init_message()
+        smb = Slack_message_builder()
 
         if not results:
-            response_message["blocks"].append(self.create_title_section(\
-                action["failed_message"]))
-            return response_message
+            smb.add_plain_section(action["failed_message"])
+            return smb.message
 
         if type(results) is list:
-            response_message["blocks"].append(self.create_title_section(\
-                action["success_message"]))
+            smb.add_plain_section(action["success_message"])
             for res in results:
-                response_message["blocks"].append(\
-                    self.create_message_section(res))
+                smb.add_formated_section(self.formate_cols(res))
         else:
-            response_message["blocks"].append(self.create_title_section(\
-                action["success_message"] % results))
+            smb.add_plain_section(action["success_message"] % results)
 
-        return response_message
+        return smb.message
 
-    def init_message(self):
-        message = {}
-        message["blocks"] = []
-        return message
-
-    def create_title_section(self, text):
-        section = {}
-        section["type"] = "section"
-        section["text"] = {}
-        section["text"]["type"] = "plain_text"
-        section["text"]["text"] = text
-        return section
-
-    def create_message_section(self, elements):
-        section = {}
-        section["type"] = "section"
-        section["text"] = {}
-        section["text"]["type"] = "mrkdwn"
-
-        task_id = elements[0]
-        text = elements[1]
-        ts = elements[2]
+    def formate_cols(self, cols):
+        task_id = cols[0]
+        text = cols[1]
+        ts = cols[2]
 
         ts = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S.%f')
         ts = ts.strftime("%Y-%m-%d %H:%M")
 
         text = f"{task_id} - *{text}* {ts}"
-        section["text"]["text"] = text
-        return section
+        return text
 
 if __name__ == '__main__':
     todo_list = Todo_list("../db/services_db.db")
