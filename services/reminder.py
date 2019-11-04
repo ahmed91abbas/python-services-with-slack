@@ -6,6 +6,7 @@ import time
 import re
 import datetime
 from services.utils.db_manager import Db_manager
+from services.utils.slack_message_builder import Slack_message_builder
 
 TABLE_NAME = "reminders"
 ID_COL = "generated_id"
@@ -88,35 +89,23 @@ class Reminder:
             return "Reminder: " + text, to_channel
         elif type(text) is list:
             if text:
-                response_message = self.init_message()
+                smb = Slack_message_builder()
                 for elem in text:
-                    response_message["blocks"].append(\
-                        self.create_message_section(elem))
-                return response_message, from_channel
+                    smb.add_formated_section(self.formate_cols(elem))
+                return smb.message, from_channel
             else:
                 return "Nothing scheduled.", from_channel
         else:
             return "Failed to parse reminder message", from_channel
 
-    def init_message(self):
-        message = {}
-        message["blocks"] = []
-        return message
-
-    def create_message_section(self, elements):
-        section = {}
-        section["type"] = "section"
-        section["text"] = {}
-        section["text"]["type"] = "mrkdwn"
-
-        text = elements[1]
-        scheduled_ts = elements[3]
+    def formate_cols(self, cols):
+        text = cols[1]
+        scheduled_ts = cols[3]
 
         scheduled_ts = datetime.datetime.strptime(scheduled_ts, '%Y-%m-%d %H:%M:%S.%f')
         scheduled_ts = scheduled_ts.strftime("%Y-%m-%d %H:%M:%S")
 
-        section["text"]["text"] = f"*{text}* - Scheduled at: *{scheduled_ts}*"
-        return section
+        return f"*{text}* - Scheduled at: *{scheduled_ts}*"
 
 if __name__ == '__main__':
     message = "reminder to x and y after 1 sec"
