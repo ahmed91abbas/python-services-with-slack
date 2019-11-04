@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath('..'))
 
 from datetime import datetime
 import re
-from services.db_manager import Db_manager
+from services.utils.db_manager import Db_manager
 
 TABLE_NAME = "todo_list"
 ID_COL = "generated_id"

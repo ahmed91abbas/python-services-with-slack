@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath('..'))
 import time
 import re
 import datetime
-from services.db_manager import Db_manager
+from services.utils.db_manager import Db_manager
 
 TABLE_NAME = "reminders"
 ID_COL = "generated_id"

@@ -6,8 +6,8 @@ import re
 import time
 from datetime import datetime
 from datetime import date
-from services.db_manager import Db_manager
-from services.slack_message_builder import Slack_message_builder
+from services.utils.db_manager import Db_manager
+from services.utils.slack_message_builder import Slack_message_builder
 
 class Prayer_times:
 
