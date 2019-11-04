@@ -59,7 +59,7 @@ class App:
             response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
         elif self.get_match("(?:reminder|remind me)(.*)", message):
             self.send_response("Ok", channel)
-            response_message, channel = Reminder(self.env("DB_FILE")).build_response_message(message, from_channel=channel, to_channel="#reminders")
+            response_message = Reminder(self.env("DB_FILE")).build_response_message(message)
         else:
             response_message = 'No service found for your text! Type "Help" to get a list of the available services'
         return response_message, channel

@@ -80,23 +80,23 @@ class Reminder:
         p = re.compile(regex, re.IGNORECASE)
         return p.match(text)
 
-    def build_response_message(self, message, from_channel=None, to_channel=None):
+    def build_response_message(self, message):
         text, delta = self.parse_message(message)
         if delta:
             task_id = self.create_task(text, delta)
             time.sleep(delta)
             self.delete_task(task_id)
-            return "Reminder: " + text, to_channel
+            return "<!channel> Reminder: " + text
         elif type(text) is list:
             if text:
                 smb = Slack_message_builder()
                 for elem in text:
                     smb.add_formated_section(self.formate_cols(elem))
-                return smb.message, from_channel
+                return smb.message
             else:
-                return "Nothing scheduled.", from_channel
+                return "Nothing scheduled."
         else:
-            return "Failed to parse reminder message", from_channel
+            return "Failed to parse reminder message"
 
     def formate_cols(self, cols):
         text = cols[1]
