@@ -16,7 +16,7 @@ SCHEDULED_COL = "scheduled_datetime"
 
 class Reminder:
 
-    def __init__(self, db_file):
+    def __init__(self, db_file, *args):
         self.sec_names = ["s", "sec", "second", "seconds"]
         self.min_names = ["m", "min", "minute", "minutes"]
         self.hour_names = ["h", "hour", "hours"]
@@ -80,8 +80,8 @@ class Reminder:
         p = re.compile(regex, re.IGNORECASE)
         return p.match(text)
 
-    def build_response_message(self, message):
-        text, delta = self.parse_message(message)
+    def build_response_message(self, text, **kwargs):
+        text, delta = self.parse_message(text)
         if delta:
             task_id = self.create_task(text, delta)
             time.sleep(delta)
@@ -108,9 +108,9 @@ class Reminder:
         return f"*{text}* - Scheduled at: *{scheduled_ts}*"
 
 if __name__ == '__main__':
-    message = "reminder to x and y after 1 sec"
+    text = "reminder to x and y after 1 sec"
     reminder = Reminder("../db/services_db.db")
-    res = reminder.build_response_message(message)[0]
+    res = reminder.build_response_message(text=text)
     if type(res) is dict:
         for section in res["blocks"]:
             print(section["text"]["text"])
