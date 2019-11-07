@@ -14,7 +14,7 @@ CREATED_COL = "created_datetime"
 
 class Todo_list:
 
-    def __init__(self, db_file):
+    def __init__(self, db_file, *args):
         self.action_list = self.init_action_list()
         self.error_msg = None
         self.db = Db_manager(db_file, TABLE_NAME)
@@ -90,9 +90,9 @@ class Todo_list:
         failed["failed_message"] = "Command not found!"
         return failed, None
 
-    def build_response_message(self, message_text):
+    def build_response_message(self, text, **kwargs):
 
-        action, results = self.excute_message_action(message_text)
+        action, results = self.excute_message_action(text)
 
         if self.error_msg:
             return self.error_msg
