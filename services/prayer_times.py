@@ -76,8 +76,7 @@ class Prayer_times:
         smb = Slack_message_builder()
 
         if not rows:
-            #TODO more generic message
-            smb.add_plain_section(f"No results found for M {month}, D {day}")
+            smb.add_plain_section(f"No results found for {message_text}")
             return smb.message
 
         now = datetime.now()
