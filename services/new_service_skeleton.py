@@ -26,7 +26,7 @@ class New_service_skeleton:
         though the main application should be also passed explicitly
         in the argument to this method
         '''
-        print("Some setup code")
+        pass
 
     def build_response_message(self, text, **kwargs):
         '''
