@@ -17,13 +17,11 @@ class Prayer_times:
         self.error_msg = None
         self.db = Db_manager(db_file, "prayer_times")
 
-    def select_times_by_date(self, month_str=None, day_str=None):
-        if month_str and day_str:
-            cols = ["month", "day"]
-            values = [month_str, day_str]
-            rows = self.db.select_where_condition(cols, values, select_cols=self.column_names)
-        elif month_str:
-            rows = self.db.select_where_condition("month", month_str, select_cols=self.column_names)
+    def get_times(self, **kwargs):
+        #Remove None values from dict
+        cond_kwargs = {k:v for k,v in kwargs.items() if v is not None}
+        if cond_kwargs:
+            rows = self.db.select_where_condition(cond_kwargs, select_cols=self.column_names)
         else:
             return []
 
@@ -73,11 +71,12 @@ class Prayer_times:
 
         month, day, is_dst = self.parse_message(message_text)
 
-        rows = self.select_times_by_date(month_str=month, day_str=day)
+        rows = self.get_times(month=month, day=day)
 
         smb = Slack_message_builder()
 
         if not rows:
+            #TODO more generic message
             smb.add_plain_section(f"No results found for M {month}, D {day}")
             return smb.message
 
