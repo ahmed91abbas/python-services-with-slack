@@ -13,8 +13,26 @@ class App:
         self.env = Env()
         self.env.read_env()
         self.starterbot_id = None
+        self.action_list = self.init_action_list()
         #Empty reminder list on start
         Reminder(self.env("DB_FILE")).delete_all_reminders()
+
+    def init_action_list(self):
+        action_list = {}
+
+        action_list["todo_list"] = {}
+        action_list["todo_list"]["regex"] = '(.*)todo$'
+        action_list["todo_list"]["service"] = Todo_list
+
+        action_list["reminder"] = {}
+        action_list["reminder"]["regex"] = '(?:reminder|remind me)(.*)'
+        action_list["reminder"]["service"] = Reminder
+
+        action_list["prayer_times"] = {}
+        action_list["prayer_times"]["regex"] = 'prayer times(.*)'
+        action_list["prayer_times"]["service"] = Prayer_times
+
+        return action_list
 
     def start(self, rtm_read_delay=0.3):
         self.slack_client = SlackClient(self.env("SERVICES_BOT_ACCESS_TOKEN"))
@@ -48,20 +66,23 @@ class App:
         return p.match(text)
 
     def handle_message(self, event):
-        message = event["text"]
+        text = event["text"]
         channel = event["channel"]
         user = event["user"]
-        if self.get_match("(?:hi|hello|ping)", message):
-            response_message = "Hello <@%s>! :tada:" % user
-        elif self.get_match("prayer times(.*)", message):
-            response_message = Prayer_times(self.env("DB_FILE")).build_response_message(message)
-        elif self.get_match("(.*)todo", message):
-            response_message = Todo_list(self.env("DB_FILE")).build_response_message(message)
-        elif self.get_match("(?:reminder|remind me)(.*)", message):
-            self.send_response("Ok", channel)
-            response_message = Reminder(self.env("DB_FILE")).build_response_message(message)
-        else:
-            response_message = 'No service found for your text! Type "Help" to get a list of the available services'
+        response_message = 'No service found for your text! Type "Help" to get a list of the available services'
+
+        for key, value in self.action_list.items():
+            if self.get_match(value["regex"], text):
+                response_message = value["service"](self.env("DB_FILE"))\
+                  .build_response_message(**event, action_list=self.action_list)
+                return response_message, channel
+
+        if self.get_match("help", text):
+            response_message = "List of available services:"
+            for key, value in self.action_list.items():
+                response_message += "\n" + key + ":\n"
+                response_message += "Regex: " + value["regex"]
+
         return response_message, channel
 
     def send_response(self, message, channel):
