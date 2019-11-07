@@ -27,7 +27,9 @@ class Db_manager:
             self.error_msg = str(e)
         return None
 
-    def select_where_condition(self, cols, values, select_cols="*"):
+    def select_where_condition(self, cond_kwargs, select_cols="*"):
+        cols = list(cond_kwargs.keys())
+        values = list(cond_kwargs.values())
         where_stmt = self.create_where_statment(cols)
         try:
             with self.conn:
@@ -35,7 +37,7 @@ class Db_manager:
                     select_cols = ", ".join(select_cols)
                 cur = self.conn.cursor()
                 sql = f'''SELECT {select_cols} FROM {self.table_name} {where_stmt}'''
-                cur.execute(sql, (self.to_list(values)))
+                cur.execute(sql, (values))
                 return cur.fetchall()
         except Error as e:
             self.error_msg = str(e)
