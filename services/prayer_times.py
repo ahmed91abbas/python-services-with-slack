@@ -11,7 +11,7 @@ from services.utils.slack_message_builder import Slack_message_builder
 
 class Prayer_times:
 
-    def __init__(self, db_file):
+    def __init__(self, db_file, *args):
         self.column_names = ["day", "fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"]
         self.regex = 'prayer times(?: month| m)? (\\d{2})(?: day (\\d{2})| d (\\d{2})| (\\d{2}))?'
         self.error_msg = None
@@ -65,18 +65,18 @@ class Prayer_times:
 
         return month, day, is_dst
 
-    def build_response_message(self, message_text):
+    def build_response_message(self, text, **kwargs):
         if self.error_msg:
             return self.error_msg
 
-        month, day, is_dst = self.parse_message(message_text)
+        month, day, is_dst = self.parse_message(text)
 
         rows = self.get_times(month=month, day=day)
 
         smb = Slack_message_builder()
 
         if not rows:
-            smb.add_plain_section(f"No results found for {message_text}")
+            smb.add_plain_section(f"No results found for {text}")
             return smb.message
 
         now = datetime.now()
