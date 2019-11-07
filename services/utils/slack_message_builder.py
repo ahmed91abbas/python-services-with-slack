@@ -5,6 +5,10 @@ class Slack_message_builder:
         self.message = {}
         self.message["blocks"] = []
 
+    def add_divider(self):
+        divider = {"type": "divider"}
+        self.message["blocks"].append(divider)
+
     def add_plain_section(self, elements):
         self.add_section("plain_text", elements)
 
