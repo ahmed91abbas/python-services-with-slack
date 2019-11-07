@@ -1,11 +1,12 @@
 import time
 import re
+import threading
 from slackclient import SlackClient
 from environs import Env
 from services.prayer_times import Prayer_times
 from services.todo_list import Todo_list
 from services.reminder import Reminder
-import threading
+from services.services_manual import Services_manual
 
 class App:
 
@@ -19,6 +20,10 @@ class App:
 
     def init_action_list(self):
         action_list = {}
+
+        action_list["services_manual"] = {}
+        action_list["services_manual"]["regex"] = 'help$'
+        action_list["services_manual"]["service"] = Services_manual
 
         action_list["todo_list"] = {}
         action_list["todo_list"]["regex"] = '(.*)todo$'
