@@ -16,7 +16,6 @@ class Services_manual:
             smb.add_formated_section(f'*{value["name"]}*')
             smb.add_plain_section(value["discription"])
             smb.add_plain_section(f'*Trigger regex (case ignored):* {value["regex"]}')
-            # smb.add_plain_section(value["regex"])
             smb.add_divider()
 
         return smb.message
