@@ -116,7 +116,7 @@ class App:
         if r["ok"]:
             print("Posted message successfully. ts=" + r["ts"])
         else:
-            print("Failed to post message! ts=" + r["ts"])
+            print(f'Error: {r["error"]}! Date="{r["headers"]["Date"]}')
 
 if __name__ == "__main__":
     App().start()
