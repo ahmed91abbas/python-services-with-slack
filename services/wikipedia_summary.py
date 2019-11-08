@@ -18,14 +18,11 @@ class Wikipedia_summary:
             if search:
                 text = wikipedia.search(text, results=10)
             else:
-                text = wikipedia.summary(text, sentences=10)
+                text = wikipedia.summary(text)
         except Exception as e:
             text = str(e)
 
-        smb = Slack_message_builder()
-        smb.add_plain_section(text)
-
-        return smb.message
+        return text
 
     def get_match(self, regex, text):
         p = re.compile(regex, re.IGNORECASE)
