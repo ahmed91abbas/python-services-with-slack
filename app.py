@@ -24,18 +24,26 @@ class App:
         action_list["services_manual"] = {}
         action_list["services_manual"]["regex"] = 'help$'
         action_list["services_manual"]["service"] = Services_manual
+        action_list["services_manual"]["name"] = 'Services Manual'
+        action_list["services_manual"]["discription"] = 'List all the services available and the way to trigger them'
 
         action_list["todo_list"] = {}
         action_list["todo_list"]["regex"] = '(.*)todo$'
         action_list["todo_list"]["service"] = Todo_list
+        action_list["todo_list"]["name"] = 'ToDo List'
+        action_list["todo_list"]["discription"] = 'A simple todo list with SQL like commands'
 
         action_list["reminder"] = {}
         action_list["reminder"]["regex"] = '(?:reminder|remind me)(.*)'
         action_list["reminder"]["service"] = Reminder
+        action_list["reminder"]["name"] = 'Reminder Service'
+        action_list["reminder"]["discription"] = 'Sends notification at the specified time to the channel'
 
         action_list["prayer_times"] = {}
         action_list["prayer_times"]["regex"] = 'prayer times(.*)'
         action_list["prayer_times"]["service"] = Prayer_times
+        action_list["prayer_times"]["name"] = 'Prayer Times'
+        action_list["prayer_times"]["discription"] = 'Get the prayer times for the specified date'
 
         return action_list
 
@@ -81,12 +89,6 @@ class App:
                 response_message = value["service"](self.env("DB_FILE"))\
                   .build_response_message(**event, action_list=self.action_list)
                 return response_message, channel
-
-        if self.get_match("help", text):
-            response_message = "List of available services:"
-            for key, value in self.action_list.items():
-                response_message += "\n" + key + ":\n"
-                response_message += "Regex: " + value["regex"]
 
         return response_message, channel
 
