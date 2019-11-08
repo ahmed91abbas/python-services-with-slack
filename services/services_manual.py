@@ -9,9 +9,14 @@ class Services_manual:
     def build_response_message(self, action_list, **kwargs):
 
         smb = Slack_message_builder()
+        smb.add_plain_section("List of available services:")
+        smb.add_divider()
+        smb.add_divider()
         for key, value in action_list.items():
-            smb.add_formated_section(f'Service name: *{key}*')
-            smb.add_plain_section(f'Regex: {value["regex"]}')
+            smb.add_formated_section(f'*{value["name"]}*')
+            smb.add_plain_section(value["discription"])
+            smb.add_plain_section(f'*Trigger regex (case ignored):* {value["regex"]}')
+            # smb.add_plain_section(value["regex"])
             smb.add_divider()
 
         return smb.message
