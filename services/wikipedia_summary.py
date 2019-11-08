@@ -1,9 +1,9 @@
 import os
 import sys
-import wikipedia
 sys.path.append(os.path.abspath('..'))
 
 import re
+import wikipedia
 from services.utils.slack_message_builder import Slack_message_builder
 
 
@@ -13,9 +13,14 @@ class Wikipedia_summary:
         pass
 
     def build_response_message(self, text, **kwargs):
-        text = self.parse_message(text)
-
-        text = wikipedia.summary(text)
+        search, text = self.parse_message(text)
+        try:
+            if search:
+                text = wikipedia.search(text, results=10)
+            else:
+                text = wikipedia.summary(text, sentences=10)
+        except Exception as e:
+            text = str(e)
 
         smb = Slack_message_builder()
         smb.add_plain_section(text)
@@ -27,14 +32,15 @@ class Wikipedia_summary:
         return p.match(text)
 
     def parse_message(self, text):
-        regex = '(?:wiki|wikipedia) (.*)'
+        regex = '(?:wiki|wikipedia) (?:(search) )?(.*)'
         m = self.get_match(regex, text)
-        if m:
-            return m.group(1)
-        return None
+        if not m:
+            return None, False
+
+        return m.group(1), m.group(2)
 
 if __name__ == '__main__':
-    text = "wiki python"
+    text = "wiki search wikipedia"
     wiki = Wikipedia_summary()
     res = wiki.build_response_message(text=text)
     if type(res) is dict:
