@@ -7,6 +7,7 @@ from services.prayer_times import Prayer_times
 from services.todo_list import Todo_list
 from services.reminder import Reminder
 from services.services_manual import Services_manual
+from services.wikipedia_summary import Wikipedia_summary
 
 class App:
 
@@ -44,6 +45,12 @@ class App:
         action_list["prayer_times"]["service"] = Prayer_times
         action_list["prayer_times"]["name"] = 'Prayer Times'
         action_list["prayer_times"]["discription"] = 'Get the prayer times for the specified date'
+
+        action_list["wikipedia"] = {}
+        action_list["wikipedia"]["regex"] = '(?:wiki|wikipedia) (.*)'
+        action_list["wikipedia"]["service"] = Wikipedia_summary
+        action_list["wikipedia"]["name"] = 'Wikipedia'
+        action_list["wikipedia"]["discription"] = 'Get the summary section from Wikipedia'
 
         return action_list
 
