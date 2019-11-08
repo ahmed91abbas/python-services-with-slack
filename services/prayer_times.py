@@ -87,6 +87,7 @@ class Prayer_times:
             rows = self.apply_DST_end(month, year, rows)
 
         smb.add_plain_section(f"Showing results for {month_str}")
+        smb.add_divider()
         smb.add_formated_section(self.formate_cols(self.column_names, same_style=True))
         for row in rows:
             smb.add_formated_section(self.formate_cols(row))
