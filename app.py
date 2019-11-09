@@ -8,6 +8,7 @@ from services.todo_list import Todo_list
 from services.reminder import Reminder
 from services.services_manual import Services_manual
 from services.wikipedia_summary import Wikipedia_summary
+from services.dictionary import Dictionary
 
 class App:
 
@@ -51,6 +52,12 @@ class App:
         action_list["wikipedia"]["service"] = Wikipedia_summary
         action_list["wikipedia"]["name"] = 'Wikipedia'
         action_list["wikipedia"]["discription"] = 'Get the summary section from Wikipedia'
+
+        action_list["dictionary"] = {}
+        action_list["dictionary"]["regex"] = '(?:dict|dictionary) (.*)'
+        action_list["dictionary"]["service"] = Dictionary
+        action_list["dictionary"]["name"] = 'Dictionary'
+        action_list["dictionary"]["discription"] = 'Get meanings, synonyms, antonyms or translation of a singel word'
 
         return action_list
 
