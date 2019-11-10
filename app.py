@@ -57,7 +57,7 @@ class App:
         action_list["dictionary"]["regex"] = '(?:dict|dictionary) (.*)'
         action_list["dictionary"]["service"] = Dictionary
         action_list["dictionary"]["name"] = 'Dictionary'
-        action_list["dictionary"]["discription"] = 'Get meanings, synonyms, antonyms or translation of a singel word'
+        action_list["dictionary"]["discription"] = 'Get meaning, synonyms, antonyms and examples of a singel English word'
 
         return action_list
 
