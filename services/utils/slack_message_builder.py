@@ -25,3 +25,18 @@ class Slack_message_builder:
             section["text"]["type"] = "mrkdwn"
             section["text"]["text"] = elem
             self.message["blocks"].append(section)
+
+    def add_context(self, elements):
+        context = {}
+        context["type"] = "context"
+        context["elements"] = []
+            
+        if not type(elements) is list:
+            elements = [elements]
+            
+        for elem in elements:
+            context_element = {}
+            context_element["type"] = "mrkdwn"
+            context_element["text"]= elem
+            context["elements"].append(context_element)
+        self.message["blocks"].append(context)
