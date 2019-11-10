@@ -18,7 +18,15 @@ class Wikipedia_summary:
             if search:
                 text = wikipedia.search(text, results=10)
             else:
-                text = wikipedia.summary(text)
+                page = wikipedia.page(text)
+                title = page.title
+                url = page.url
+                summary = page.summary
+                
+                smb = Slack_message_builder()
+                smb.add_formated_section(f'<{url}|*{title}*>')
+                smb.add_plain_section(summary)
+                text = smb.message
         except Exception as e:
             text = str(e)
 
@@ -37,7 +45,7 @@ class Wikipedia_summary:
         return m.group(1), m.group(2)
 
 if __name__ == '__main__':
-    text = "wiki search wikipedia"
+    text = "wiki wikipedia"
     wiki = Wikipedia_summary()
     res = wiki.build_response_message(text=text)
     if type(res) is dict:
