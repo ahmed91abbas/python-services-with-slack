@@ -11,11 +11,11 @@ from services.utils.slack_message_builder import Slack_message_builder
 
 class Prayer_times:
 
-    def __init__(self, db_file, *args):
+    def __init__(self, env, *args):
         self.column_names = ["day", "fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"]
         self.regex = 'prayer times(?: month| m)? (\\d{2})(?: day (\\d{2})| d (\\d{2})| (\\d{2}))?'
         self.error_msg = None
-        self.db = Db_manager(db_file, "prayer_times")
+        self.db = Db_manager(env("DB_FILE"), "prayer_times")
 
     def get_times(self, **kwargs):
         #Remove None values from dict

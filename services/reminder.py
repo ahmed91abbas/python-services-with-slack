@@ -16,12 +16,12 @@ SCHEDULED_COL = "scheduled_datetime"
 
 class Reminder:
 
-    def __init__(self, db_file, *args):
+    def __init__(self, env, *args):
         self.sec_names = ["s", "sec", "second", "seconds"]
         self.min_names = ["m", "min", "minute", "minutes"]
         self.hour_names = ["h", "hour", "hours"]
 
-        self.db = Db_manager(db_file, TABLE_NAME)
+        self.db = Db_manager(env("DB_FILE"), TABLE_NAME)
 
     def create_task(self, text, delta):
         created_datetime = datetime.datetime.now()

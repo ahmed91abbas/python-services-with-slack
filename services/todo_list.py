@@ -14,10 +14,10 @@ CREATED_COL = "created_datetime"
 
 class Todo_list:
 
-    def __init__(self, db_file, *args):
+    def __init__(self, env, *args):
         self.action_list = self.init_action_list()
         self.error_msg = None
-        self.db = Db_manager(db_file, TABLE_NAME)
+        self.db = Db_manager(env("DB_FILE"), TABLE_NAME)
 
     def init_action_list(self):
         action_list = {}

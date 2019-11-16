@@ -18,7 +18,7 @@ class App:
         self.starterbot_id = None
         self.action_list = self.init_action_list()
         #Empty reminder list on start
-        Reminder(self.env("DB_FILE")).delete_all_reminders()
+        Reminder(self.env).delete_all_reminders()
 
     def init_action_list(self):
         action_list = {}
@@ -100,7 +100,7 @@ class App:
 
         for key, value in self.action_list.items():
             if self.get_match(value["regex"], text):
-                response_message = value["service"](self.env("DB_FILE"))\
+                response_message = value["service"](self.env)\
                   .build_response_message(**event, action_list=self.action_list)
                 return response_message, channel
 
