@@ -18,7 +18,7 @@ class Dictionary:
         ant = set()
         synsets = wordnet.synsets(text)
         if not synsets:
-            return {"error":True, "word":text}
+            return {"error": True, "word": text}
         definition = synsets[0].definition()
         examples = synsets[0].examples()
         for synset in synsets:
@@ -26,8 +26,9 @@ class Dictionary:
                 syn.add(lemma.name())
                 if lemma.antonyms():
                     ant.add(lemma.antonyms()[0].name())
-        return {"error":False, "word":text, "definition":definition, \
-            "examples":examples, "synonyms":list(syn), "antonyms":list(ant)}
+        return {"error": False, "word": text, "definition": definition,
+                "examples": examples, "synonyms": list(syn),
+                "antonyms": list(ant)}
 
     def build_response_message(self, text, **kwargs):
         result = self.parse_message(text)
@@ -39,14 +40,20 @@ class Dictionary:
         smb.add_formated_section(f'*{result["word"]}*')
         smb.add_plain_section(result["definition"])
         smb.add_divider()
+
         if result["examples"]:
-            smb.add_formated_section('*Examples:*\n' + "\n".join(result["examples"]))
+            smb.add_formated_section(
+                '*Examples:*\n' + "\n".join(result["examples"]))
             smb.add_divider()
+
         if result["synonyms"]:
-            smb.add_formated_section(f'*Synonyms:* {" ,".join(result["synonyms"])}')
+            smb.add_formated_section(
+                f'*Synonyms:* {" ,".join(result["synonyms"])}')
             smb.add_divider()
+
         if result["antonyms"]:
-            smb.add_formated_section(f'*Antonyms:* {" ,".join(result["antonyms"])}')
+            smb.add_formated_section(
+                f'*Antonyms:* {" ,".join(result["antonyms"])}')
         return smb.message
 
     def get_match(self, regex, text):

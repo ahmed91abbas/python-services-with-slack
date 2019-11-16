@@ -5,19 +5,23 @@ from datetime import date
 from services.utils.db_manager import Db_manager
 from services.utils.slack_message_builder import Slack_message_builder
 
+
 class Prayer_times:
 
     def __init__(self, env, *args):
-        self.column_names = ["day", "fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"]
-        self.regex = 'prayer times(?: month| m)? (\\d{2})(?: day (\\d{2})| d (\\d{2})| (\\d{2}))?'
+        self.column_names = ["day", "fajr", "sunrise", "dhuhr",
+                             "asr", "maghrib", "isha"]
+        self.regex = 'prayer times(?: month| m)? '\
+            '(\\d{2})(?: day (\\d{2})| d (\\d{2})| (\\d{2}))?'
         self.error_msg = None
         self.db = Db_manager(env("DB_FILE"), "prayer_times")
 
     def get_times(self, **kwargs):
-        #Remove None values from dict
-        cond_kwargs = {k:v for k,v in kwargs.items() if v is not None}
+        cond_kwargs = {k: v for k, v in kwargs.items() if v is not None}
         if cond_kwargs:
-            rows = self.db.select_where_condition(cond_kwargs, select_cols=self.column_names)
+            rows = self.db.select_where_condition(
+                        cond_kwargs,
+                        select_cols=self.column_names)
         else:
             return []
 
@@ -36,9 +40,8 @@ class Prayer_times:
                 if is_dst:
                     res_row.append(e)
                 else:
-                    res_row.append(\
-                        format(int(e[:2])-1, '02')\
-                        + e[2:])
+                    res_row.append(
+                        format(int(e[:2])-1, '02') + e[2:])
             res_rows.append(res_row)
         return res_rows
 
@@ -75,7 +78,6 @@ class Prayer_times:
             smb.add_plain_section(f"No results found for {text}")
             return smb.message
 
-        now = datetime.now()
         year = datetime.now().year
         month_str = date(year, int(month), 1).strftime('%B')
 
@@ -84,7 +86,8 @@ class Prayer_times:
 
         smb.add_plain_section(f"Showing results for {month_str}")
         smb.add_divider()
-        smb.add_formated_section(self.formate_cols(self.column_names, same_style=True))
+        smb.add_formated_section(self.formate_cols(self.column_names,
+                                                   same_style=True))
         for row in rows:
             smb.add_formated_section(self.formate_cols(row))
 

@@ -10,6 +10,7 @@ TEXT_COL = "text"
 CREATED_COL = "created_datetime"
 SCHEDULED_COL = "scheduled_datetime"
 
+
 class Reminder:
 
     def __init__(self, env, *args):
@@ -21,7 +22,7 @@ class Reminder:
 
     def create_task(self, text, delta):
         created_datetime = datetime.datetime.now()
-        scheduled_datetime = created_datetime + datetime.timedelta(0,delta)
+        scheduled_datetime = created_datetime + datetime.timedelta(0, delta)
         cols = [TEXT_COL, CREATED_COL, SCHEDULED_COL]
         values = [text, created_datetime, scheduled_datetime]
         return self.db.insert_values(cols, values)
@@ -51,7 +52,9 @@ class Reminder:
             return number * 3600
 
     def parse_message(self, message):
-        cond_re = self.build_cond_re(self.sec_names + self.min_names + self.hour_names)
+        cond_re = self.build_cond_re(self.sec_names +
+                                     self.min_names +
+                                     self.hour_names)
         list_all_regex = "(?:show |list )?(?:all )?reminders$"
         after_regex = f'(?:reminder|remind me) to (.*) after (\\d+) ({cond_re})$'
 
@@ -98,7 +101,8 @@ class Reminder:
         text = cols[1]
         scheduled_ts = cols[3]
 
-        scheduled_ts = datetime.datetime.strptime(scheduled_ts, '%Y-%m-%d %H:%M:%S.%f')
+        scheduled_ts = datetime.datetime.strptime(scheduled_ts,
+                                                  '%Y-%m-%d %H:%M:%S.%f')
         scheduled_ts = scheduled_ts.strftime("%Y-%m-%d %H:%M:%S")
 
         return f"*{text}* - Scheduled at: *{scheduled_ts}*"

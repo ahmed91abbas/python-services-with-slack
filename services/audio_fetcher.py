@@ -1,16 +1,21 @@
 from services.utils.slack_message_builder import Slack_message_builder
-import re
 import youtube_dl
 import subprocess
+import os
+import sys
 
 
 class MyLogger(object):
     def __init__(self):
         self.msgs = []
+
     def debug(self, msg):
         self.msgs.append(msg)
-    def warning(self, msg):pass
-    def error(self, msg):pass
+
+    def warning(self, msg): pass
+
+    def error(self, msg): pass
+
 
 class Audio_fetcher:
 
@@ -30,12 +35,13 @@ class Audio_fetcher:
         return text
 
     def ffmpeg_convert(self, in_file, out_file):
-        #TODO support for linux
+        # TODO support for linux
         _platform = sys.platform
         if _platform == "linux" or _platform == "linux2":
             print("Converting in Linux is not supported yet!")
         elif _platform == "win32" or _platform == "win64":
-            ffmpeg_exe = os.path.join(self.resources_folder, "ffmpeg_win", "bin", "ffmpeg.exe")
+            ffmpeg_exe = os.path.join(self.resources_folder, "ffmpeg_win",
+                                      "bin", "ffmpeg.exe")
             params = [ffmpeg_exe, '-i', in_file, out_file]
             subprocess.call(params, shell=False, close_fds=True)
 
@@ -45,7 +51,7 @@ class Audio_fetcher:
             filepath = os.path.join(self.aud_folder, '%(title)s.%(ext)s')
             ydl_opts = {
                 'format': 'bestaudio/best',
-                'noplaylist':True,
+                'noplaylist': True,
                 'outtmpl': filepath,
                 'logger': logger,
             }

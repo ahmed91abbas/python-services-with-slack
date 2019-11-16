@@ -1,12 +1,12 @@
 from services.utils.slack_message_builder import Slack_message_builder
-
-
 '''
 This is a skeleton class that should be used when adding
 a new service to the Slackbot.
 You will need to add this class to the action_list in the
 main application "app.py"
 '''
+
+
 class New_service_skeleton:
 
     def __init__(self, *args):

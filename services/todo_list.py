@@ -8,6 +8,7 @@ ID_COL = "generated_id"
 TEXT_COL = "text"
 CREATED_COL = "created_datetime"
 
+
 class Todo_list:
 
     def __init__(self, env, *args):
@@ -27,7 +28,8 @@ class Todo_list:
             "Failed to create a new task"
 
         action_list["enumerate_all"] = {}
-        action_list["enumerate_all"]["regex"] = '(?:enumerate |list |show |all )?todo'
+        action_list["enumerate_all"]["regex"] = \
+            '(?:enumerate |list |show |all )?todo'
         action_list["enumerate_all"]["function"] = self.list_all_tasks
         action_list["enumerate_all"]["success_message"] = \
             "All tasks in Todo list:"
@@ -35,7 +37,8 @@ class Todo_list:
             "Nothing to show. Todo list is empty."
 
         action_list["delete_task"] = {}
-        action_list["delete_task"]["regex"] = '(?:delete|remove) (\\d+) from todo'
+        action_list["delete_task"]["regex"] = \
+            '(?:delete|remove) (\\d+) from todo'
         action_list["delete_task"]["function"] = self.delete_task
         action_list["delete_task"]["success_message"] = \
             "The task with ID %s has been removed successfully"
@@ -43,7 +46,8 @@ class Todo_list:
             "Failed to remove the task"
 
         action_list["delete_all"] = {}
-        action_list["delete_all"]["regex"] = '(?:delete|remove) (?:all|everything) from todo'
+        action_list["delete_all"]["regex"] = \
+            '(?:delete|remove) (?:all|everything) from todo'
         action_list["delete_all"]["function"] = self.delete_all_tasks
         action_list["delete_all"]["success_message"] = \
             "Deleted %s tasks. Todo list is empty now."
@@ -73,7 +77,7 @@ class Todo_list:
             if m:
                 try:
                     text = m.group(1)
-                except:
+                except IndexError:
                     text = None
 
                 if text:
