@@ -1,4 +1,5 @@
 
+
 # Python Services With Slack
 A Slack bot with several services. Once the application is running you can invite your bot to any Workspace and start taking advantage of the services it provides. More on the services available can be found once the app is running.
 
@@ -28,6 +29,7 @@ A Slack bot with several services. Once the application is running you can invit
 
     * **SERVICES_BOT_ACCESS_TOKEN** value should be the **Bot User OAuth Access Token** you noted when you created the Slack app.
     * **DB_FILE** value is the absolute path to *services_db.db* which have been created in the previous step.
+    * **ROOT_PATH** value is the absolute path to the root folder "python-services-with-slack"
 
 ## Run the application
 Now all what is left is to run the application:
