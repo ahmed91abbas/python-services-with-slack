@@ -1,7 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.abspath('..'))
-
 from datetime import datetime
 import re
 from services.utils.db_manager import Db_manager
@@ -122,13 +118,3 @@ class Todo_list:
 
         text = f"{task_id} - *{text}* {ts}"
         return text
-
-if __name__ == '__main__':
-    todo_list = Todo_list("../db/services_db.db")
-    message = "delete everything from todo"
-    message = "add test to todo"
-    message = "delete 8 from todo"
-    message = "enumerate todo"
-    res = todo_list.build_response_message(message)
-    for section in res["blocks"]:
-        print(section["text"]["text"])

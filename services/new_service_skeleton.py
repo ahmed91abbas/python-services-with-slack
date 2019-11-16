@@ -1,12 +1,3 @@
-'''
-In order to enable running this class through its own
-main we need to append the absolute path of the app.py
-to the system path
-'''
-import os
-import sys
-sys.path.append(os.path.abspath('..'))
-
 from services.utils.slack_message_builder import Slack_message_builder
 
 
@@ -52,14 +43,3 @@ class New_service_skeleton:
         in build_response_message method
         '''
         return text
-
-if __name__ == '__main__':
-    text = "This is an example text message"
-    nsk = New_service_skeleton()
-    res = nsk.build_response_message(text=text)
-    if type(res) is dict:
-        for section in res["blocks"]:
-            print(section["text"]["text"])
-    else:
-        print(res)
-

@@ -1,7 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.abspath('..'))
-
 import re
 import time
 from datetime import datetime
@@ -110,13 +106,3 @@ class Prayer_times:
             text += "*" + cols[len(cols)-1] + "*"
 
         return text
-
-
-if __name__ == '__main__':
-    pt = Prayer_times("../db/services_db.db")
-    message = "prayer times"
-    message = "prayer times 11"
-    message = "prayer times month 10 d 27"
-    res = pt.build_response_message(message)
-    for section in res["blocks"]:
-        print(section["text"]["text"])

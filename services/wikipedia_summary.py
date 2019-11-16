@@ -1,7 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.abspath('..'))
-
 import re
 import wikipedia
 from services.utils.slack_message_builder import Slack_message_builder
@@ -22,7 +18,7 @@ class Wikipedia_summary:
                 title = page.title
                 url = page.url
                 summary = page.summary
-                
+
                 smb = Slack_message_builder()
                 smb.add_formated_section(f'<{url}|*{title}*>')
                 smb.add_plain_section(summary)
@@ -43,14 +39,3 @@ class Wikipedia_summary:
             return None, False
 
         return m.group(1), m.group(2)
-
-if __name__ == '__main__':
-    text = "wiki wikipedia"
-    wiki = Wikipedia_summary()
-    res = wiki.build_response_message(text=text)
-    if type(res) is dict:
-        for section in res["blocks"]:
-            print(section["text"]["text"])
-    else:
-        print(res)
-

@@ -1,7 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.abspath('..'))
-
 import time
 import re
 import datetime
@@ -106,13 +102,3 @@ class Reminder:
         scheduled_ts = scheduled_ts.strftime("%Y-%m-%d %H:%M:%S")
 
         return f"*{text}* - Scheduled at: *{scheduled_ts}*"
-
-if __name__ == '__main__':
-    text = "reminder to x and y after 1 sec"
-    reminder = Reminder("../db/services_db.db")
-    res = reminder.build_response_message(text=text)
-    if type(res) is dict:
-        for section in res["blocks"]:
-            print(section["text"]["text"])
-    else:
-        print(res)

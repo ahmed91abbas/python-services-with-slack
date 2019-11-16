@@ -1,7 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.abspath('..'))
-
 from services.utils.slack_message_builder import Slack_message_builder
 import re
 import nltk
@@ -62,17 +58,3 @@ class Dictionary:
         if m:
             return self.get_word_information(m.group(1))
         return "No results found."
-
-if __name__ == '__main__':
-    text = "dict subsidydsa"
-    dict_service = Dictionary()
-    res = dict_service.build_response_message(text=text)
-    if type(res) is dict:
-        for section in res["blocks"]:
-            if section["type"] == "divider":
-                print()
-            else:
-                print(section["text"]["text"])
-    else:
-        print(res)
-
