@@ -9,6 +9,7 @@ from services.reminder import Reminder
 from services.services_manual import Services_manual
 from services.wikipedia_summary import Wikipedia_summary
 from services.dictionary import Dictionary
+from services.audio_fetcher import Audio_fetcher
 
 class App:
 
@@ -58,6 +59,12 @@ class App:
         action_list["dictionary"]["service"] = Dictionary
         action_list["dictionary"]["name"] = 'Dictionary'
         action_list["dictionary"]["discription"] = 'Get meaning, synonyms, antonyms and examples of a singel English word'
+
+        action_list["audio_fetcher"] = {}
+        action_list["audio_fetcher"]["regex"] = 'mp3 http(.*)'
+        action_list["audio_fetcher"]["service"] = Audio_fetcher
+        action_list["audio_fetcher"]["name"] = 'Audio Fetcher'
+        action_list["audio_fetcher"]["discription"] = 'Fetch and upload mp3 from the URL. If the URL refers to a video, that video will be converted to mp3'
 
         return action_list
 
