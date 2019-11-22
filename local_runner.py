@@ -141,43 +141,55 @@ class Local_runner:
 
 
     def call_prayer_times(self):
-        from services.prayer_times import Prayer_times
-        service = Prayer_times(self.env)
+        import services.prayer_times as prayer_times
+        import importlib; importlib.reload(prayer_times)
+
+        service = prayer_times.Prayer_times(self.env)
         message = service.build_response_message(**self.event)
         return message
 
 
     def call_todo_list(self):
-        from services.todo_list import Todo_list
-        service = Todo_list(self.env)
+        import services.todo_list as todo_list
+        import importlib; importlib.reload(todo_list)
+
+        service = todo_list.Todo_list(self.env)
         message = service.build_response_message(**self.event)
         return message
 
 
     def call_reminder(self):
-        from services.reminder import Reminder
-        service = Reminder(self.env)
+        import services.reminder as reminder
+        import importlib; importlib.reload(reminder)
+
+        service = reminder.Reminder(self.env)
         message = service.build_response_message(**self.event)
         return message
 
 
     def call_wikipedia_summary(self):
-        from services.wikipedia_summary import Wikipedia_summary
-        service = Wikipedia_summary(self.env)
+        import services.wikipedia_summary as wikipedia_summary
+        import importlib; importlib.reload(wikipedia_summary)
+
+        service = wikipedia_summary.Wikipedia_summary(self.env)
         message = service.build_response_message(**self.event)
         return message
 
 
     def call_dictionary(self):
-        from services.dictionary import Dictionary
-        service = Dictionary(self.env)
+        import services.dictionary as dictionary
+        import importlib; importlib.reload(dictionary)
+
+        service = dictionary.Dictionary(self.env)
         message = service.build_response_message(**self.event)
         return message
 
 
     def call_audio_fetcher(self):
-        from services.audio_fetcher import Audio_fetcher
-        service = Audio_fetcher(self.env)
+        import services.audio_fetcher as audio_fetcher
+        import importlib; importlib.reload(audio_fetcher)
+
+        service = audio_fetcher.Audio_fetcher(self.env)
         message = service.build_response_message(**self.event)
         return message
 
