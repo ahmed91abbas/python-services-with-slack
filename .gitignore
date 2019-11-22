@@ -6,3 +6,4 @@ env
 *.db
 .vscode/
 downloads/
+default_values.json
