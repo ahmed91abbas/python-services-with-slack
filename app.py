@@ -1,5 +1,6 @@
 import time
 import re
+import os
 import threading
 from slackclient import SlackClient
 from environs import Env
@@ -68,7 +69,7 @@ class App:
             ' antonyms and examples of a singel English word'
 
         action_list["audio_fetcher"] = {}
-        action_list["audio_fetcher"]["regex"] = 'mp3 http(.*)'
+        action_list["audio_fetcher"]["regex"] = 'mp3 <?(http.*)>'
         action_list["audio_fetcher"]["service"] = Audio_fetcher
         action_list["audio_fetcher"]["name"] = 'Audio Fetcher'
         action_list["audio_fetcher"]["discription"] = 'Fetch and upload mp3'\
@@ -97,11 +98,18 @@ class App:
 
     def handle_message_and_send_response(self, event):
         message, channel = self.handle_message(event)
-        self.send_response(message, channel)
+        if type(message) is dict and "upload_file" in message:
+            self.upload_file(message["upload_file"],
+                             os.path.basename(message["upload_file"]),
+                             channel)
+        else:
+            self.send_response(message, channel)
 
     def parse_events(self, slack_events):
         for event in slack_events:
-            if event["type"] == "message" and "subtype" not in event:
+            if event["type"] == "message" and \
+               "subtype" not in event and \
+               "files" not in event:
                 return event
         return None
 
@@ -139,9 +147,24 @@ class App:
             )
 
         if r["ok"]:
-            print("Posted message successfully. ts=" + r["ts"])
+            print(f'Posted message successfully. ts={r["ts"]}')
         else:
-            print(f'Error: {r["error"]}! Date="{r["headers"]["Date"]}')
+            print(f'Error: {r["error"]}! Date={r["headers"]["Date"]}')
+
+    def upload_file(self, filename, title, channel):
+        with open(filename, "rb") as file_content:
+            r = self.slack_client.api_call(
+                    "files.upload",
+                    channels=channel,
+                    file=file_content,
+                    title=title
+                )
+
+        if r["ok"]:
+            print(f'Uploaded file successfully. ts={r["file"]["timestamp"]}')
+        else:
+            print(f'Error: {r["error"]}! Date={r["headers"]["Date"]}')
+        # TODO - Remove file after upload
 
 
 if __name__ == "__main__":
