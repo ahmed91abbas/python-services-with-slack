@@ -173,7 +173,9 @@ class Local_runner:
 
     def to_string(self, message):
         result = ""
-        if type(message) is dict:
+        if type(message) is dict and "upload_file" in message:
+            result = message["upload_file"]
+        elif type(message) is dict:
             for section in message["blocks"]:
                 if section["type"] == "divider":
                     result += "-"*40 + "\n"
