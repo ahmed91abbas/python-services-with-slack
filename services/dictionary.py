@@ -64,4 +64,4 @@ class Dictionary:
         m = self.get_match('(?:dict|dictionary) (.*)', text)
         if m:
             return self.get_word_information(m.group(1))
-        return "No results found."
+        return {"error": True, "word": text}
