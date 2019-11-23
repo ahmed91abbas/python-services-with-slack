@@ -26,19 +26,19 @@ class Audio_fetcher:
         self.aud_folder = os.path.join(env("ROOT_PATH"), "downloads")
 
     def build_response_message(self, text, **kwargs):
-        text = self.parse_message(text)
+        result = self.parse_message(text)
 
-        smb = Slack_message_builder()
-        smb.add_plain_section(text)
+        if result["error"]:
+            return result["message"]
 
-        return smb.message
+        return {"upload_file":result["message"]}
 
     def parse_message(self, text):
-        match = self.get_match("mp3 (http.*)", text)
+        match = self.get_match("mp3 <?(http.*)>", text)
         if match:
             res = self.ydl_audios(match.group(1))
             return res
-        return "Failed to parse message"
+        return {"error":True, "message":"Failed to parse message"}
 
     def get_match(self, regex, text):
         p = re.compile(regex, re.IGNORECASE)
@@ -77,7 +77,8 @@ class Audio_fetcher:
                         new_name = name + ".mp3"
                         self.ffmpeg_convert(filename, new_name)
                         os.remove(filename)
+                        filename = new_name
                     break
-            return "Finished downloading"
+            return {"error":False, "message":filename}
         except Exception as e:
-            return str(e)
+            return {"error":True, "message":str(e)}
