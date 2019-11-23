@@ -1,6 +1,7 @@
 import time
 import re
 import os
+import shutil
 import threading
 from slackclient import SlackClient
 from environs import Env
@@ -159,12 +160,12 @@ class App:
                     file=file_content,
                     title=title
                 )
+        shutil.rmtree(os.path.join(filename, os.pardir))
 
         if r["ok"]:
             print(f'Uploaded file successfully. ts={r["file"]["timestamp"]}')
         else:
             print(f'Error: {r["error"]}! Date={r["headers"]["Date"]}')
-        # TODO - Remove file after upload
 
 
 if __name__ == "__main__":
