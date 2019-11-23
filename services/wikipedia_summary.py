@@ -1,6 +1,6 @@
 import re
 import wikipedia
-from services.utils.slack_message_builder import Slack_message_builder
+from utils.slack_message_builder import Slack_message_builder
 
 
 class Wikipedia_summary:

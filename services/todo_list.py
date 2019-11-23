@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
-from services.utils.db_manager import Db_manager
-from services.utils.slack_message_builder import Slack_message_builder
+from utils.db_manager import Db_manager
+from utils.slack_message_builder import Slack_message_builder
 
 TABLE_NAME = "todo_list"
 ID_COL = "generated_id"

@@ -1,4 +1,4 @@
-from services.utils.slack_message_builder import Slack_message_builder
+from utils.slack_message_builder import Slack_message_builder
 import re
 import nltk
 try:

@@ -1,4 +1,4 @@
-from services.utils.slack_message_builder import Slack_message_builder
+from utils.slack_message_builder import Slack_message_builder
 '''
 This is a skeleton class that should be used when adding
 a new service to the Slackbot.
