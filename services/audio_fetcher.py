@@ -3,6 +3,8 @@ import youtube_dl
 import subprocess
 import os
 import sys
+import re
+import uuid
 
 
 class MyLogger(object):
@@ -32,7 +34,15 @@ class Audio_fetcher:
         return smb.message
 
     def parse_message(self, text):
-        return text
+        match = self.get_match("mp3 (http.*)", text)
+        if match:
+            res = self.ydl_audios(match.group(1))
+            return res
+        return "Failed to parse message"
+
+    def get_match(self, regex, text):
+        p = re.compile(regex, re.IGNORECASE)
+        return p.match(text)
 
     def ffmpeg_convert(self, in_file, out_file):
         # TODO support for linux
@@ -48,7 +58,7 @@ class Audio_fetcher:
     def ydl_audios(self, url):
         try:
             logger = MyLogger()
-            filepath = os.path.join(self.aud_folder, '%(title)s.%(ext)s')
+            filepath = os.path.join(self.aud_folder, str(uuid.uuid4()), '%(title)s.%(ext)s')
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'noplaylist': True,
@@ -68,5 +78,6 @@ class Audio_fetcher:
                         self.ffmpeg_convert(filename, new_name)
                         os.remove(filename)
                     break
+            return "Finished downloading"
         except Exception as e:
-            print(str(e))
+            return str(e)
