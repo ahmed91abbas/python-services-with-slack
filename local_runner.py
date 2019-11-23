@@ -49,11 +49,13 @@ class Local_runner:
         self.options_frame = tk.Frame(self.root, bg=self.bg_color)
         self.message_frame = tk.Frame(self.root, bg=self.bg_color)
         self.action_frame = tk.Frame(self.root, bg=self.bg_color)
+        self.response_label_frame = tk.Frame(self.root, bg=self.bg_color)
         self.response_frame = tk.Frame(self.root, bg=self.bg_color)
 
         self.options_frame.pack(pady=10)
         self.message_frame.pack(padx=10, pady=10)
         self.action_frame.pack(pady=10)
+        self.response_label_frame.pack(padx=10)
         self.response_frame.pack(padx=10, pady=10)
 
         services_list = list(self.services_dict.keys())
@@ -98,14 +100,18 @@ class Local_runner:
                            command=self.run_service)
         button.pack(side="left", padx=20)
 
-        label = tk.Label(self.response_frame, text="Response:",
+        label = tk.Label(self.response_label_frame, text="Response:",
                          bg=self.bg_color, font=font)
         label.pack(pady=5)
         self.response_text = tk.Text(self.response_frame,
-                                     width=65,
+                                     width=68,
                                      height=15,
                                      font=font)
-        self.response_text.pack(pady=5)
+        self.response_text.pack(side=tk.LEFT)
+        scrollbar = tk.Scrollbar(self.response_frame,
+                                 command=self.response_text.yview)
+        scrollbar.pack(side=tk.LEFT, fill=tk.Y)
+        self.response_text['yscrollcommand'] = scrollbar.set
 
     def start_gui(self):
         self.root.mainloop()
